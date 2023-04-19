@@ -7,3 +7,4 @@ repository = "https://github.com/genieCS/tetris-rs"
 
 [dependencies]
 cursive = "0.20"
+rand = "0.8.4"
