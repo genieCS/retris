@@ -1,3 +1,5 @@
+use tetris_rs::game::run;
+
 fn main() {
-    println!("Hello, world!");
+    run();
 }
