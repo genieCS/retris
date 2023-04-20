@@ -22,13 +22,11 @@ impl CurrentBlock {
         for block in &self.block.shape.vectors() {
             let next_x = xy.x  as i32 + block.x as i32  + delta.0;
             let next_y =  xy.y as i32 + block.y as i32 + delta.1;
-            if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32
+            if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || board[next_y as usize][next_x as usize] != background
             {
                 return (false, stop);
-            } else if board[next_x as usize][next_y as usize] != background {
-                return (false, stop);
             }
-            if next_y == BOARD_HEIGHT as i32 - 1 || board[next_x as usize][next_y as usize + 1] != background
+            if next_y + 1 == BOARD_HEIGHT as i32 || next_y + 1 < BOARD_HEIGHT as i32 && board[next_y as usize + 1][next_x as usize] != background
             {
                 stop = true;
             }
@@ -68,18 +66,25 @@ impl Container {
     pub fn move_lrd(&mut self, lrd: LRD) -> bool {
         let (can_move, stop) = self.current.can_move_lrd(&lrd, &self.board);
         if !can_move {
-            return false;
+            return true;
         }
         self.current.move_lrd(lrd);
         stop
     }
 
+    pub fn drop_down(&mut self) {
+        let mut stopped = false;
+        while !stopped {
+            stopped = self.move_lrd(LRD::Down)
+        }
+    }
+
     fn draw_background(&self, printer: &Printer) {
-        for i in 0..10 {
+        for i in 0..BOARD_WIDTH {
             printer.print((2*i + 1 + self.x_padding, self.y_padding), "_");
         }
-        for j in 0..20 {
-            for i in 0..10 {
+        for j in 0..BOARD_HEIGHT {
+            for i in 0..BOARD_WIDTH {
                 printer.print((2*i + self.x_padding, j + self.y_padding + 1), "|_");
             }
             printer.print((20+self.x_padding, j + self.y_padding + 1), "|");
