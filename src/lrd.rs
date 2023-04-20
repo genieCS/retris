@@ -6,3 +6,13 @@ pub enum LRD {
     Right,
     Down,
 }
+
+impl LRD {
+    pub fn delta(&self) -> (i32, i32) {
+        match self {
+            LRD::Left => (-1, 0),
+            LRD::Right => (1, 0),
+            LRD::Down => (0, 1),
+        }
+     }
+}
