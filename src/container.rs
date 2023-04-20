@@ -1,10 +1,11 @@
 use cursive::{
-    event::{Event, EventResult, Key},
+    event::{Callback, Event, EventResult, Key},
     View, Vec2,
     Printer, 
     theme::{Color, ColorStyle},
 };
 use crate::block::Block;
+use crate::queue::Queue;
 use crate::lrd::{LRD, BOARD_WIDTH, BOARD_HEIGHT};
 
 const BACKGROUND_FRONT: Color = Color::Rgb(0,0,0);
@@ -98,22 +99,27 @@ impl Container {
             stopped = self.move_lrd(LRD::Down)
         }
         self.merge_block();
-        self.current = CurrentBlock {
-            block: Block::new(),
-            pos: Vec2::new(4, 0),
-        };
-        EventResult::Consumed(None)
+
+        EventResult::Consumed(Some(Callback::from_fn(move |s| {
+            let mut queue = s.find_name::<Queue>("queue").unwrap();
+            let block = queue.pop_and_spawn_new_block();
+            s.find_name::<Container>("container").unwrap().insert_new_block(block);
+        })))
     }
 
-    pub fn handle_tick(&mut self) {
+    pub fn handle_tick(&mut self) -> bool {
         let stopped = self.move_lrd(LRD::Down);
         if stopped {
             self.merge_block();
-            self.current = CurrentBlock {
-                block: Block::new(),
-                pos: Vec2::new(4, 0),
-            };
         }
+        stopped
+    }
+
+    pub fn insert_new_block(&mut self, block: Block) {
+        self.current = CurrentBlock {
+            block,
+            pos: Vec2::new(4, 0),
+        };
     }
 
     fn merge_block(&mut self) {
