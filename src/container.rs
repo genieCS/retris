@@ -123,6 +123,56 @@ impl Container {
     }
 
     fn merge_block(&mut self) {
+        self.fill_board_with_current_block();
+        self.remove_rows_if_possible();
+    }
+
+    fn remove_rows_if_possible(&mut self) {
+        let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
+        let mut rows_to_remove = Vec::new();
+        for (i, row) in self.board.iter_mut().enumerate().rev() {
+            let mut remove = true;
+            for cell in row.iter() {
+                if cell == &background {
+                    remove = false;
+                    break;
+                }
+            }
+            if remove {
+                rows_to_remove.push(i);
+            }
+        }
+        self.remove_rows(rows_to_remove);
+    }
+
+    fn remove_rows(&mut self, rows_to_remove: Vec<usize>) {
+        if rows_to_remove.is_empty() {
+            return;
+        }
+        let mut fill_y = BOARD_HEIGHT - 1;
+        let mut check_y = BOARD_HEIGHT - 1;
+        for row in rows_to_remove {
+            while check_y > row {
+                if fill_y != check_y {
+                    self.board[fill_y] = self.board[check_y];
+                }
+                fill_y -= 1;
+                check_y -= 1;
+            }
+            check_y = row - 1;
+        }
+        while check_y > 0 {
+            self.board[fill_y] = self.board[check_y];
+            fill_y -= 1;
+            check_y -= 1;
+        }
+        while fill_y > 0 {
+            self.board[fill_y] = [ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK); BOARD_WIDTH];
+            fill_y -= 1;
+        }
+    }
+
+    fn fill_board_with_current_block(&mut self) {
         for block in &self.current.block.shape.vectors() {
             let x = self.current.pos.x + block.x;
             let y = self.current.pos.y + block.y;
