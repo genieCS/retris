@@ -1,5 +1,4 @@
 use crate::container::Container;
-use crate::lrd::LRD;
 use cursive::{
     Cursive, CursiveExt,
     event::{Event}, view::Nameable,
@@ -12,7 +11,7 @@ pub fn run() {
 
     // Schedule a tick function to be called every second
     siv.add_global_callback(Event::Refresh, |s| {
-        s.call_on_name("container", |v: &mut Container| v.move_lrd(LRD::Down));
+        s.call_on_name("container", |v: &mut Container| v.handle_tick());
     });
     siv.set_fps(1);
 
