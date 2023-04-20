@@ -1,18 +1,25 @@
-pub const BOARD_WIDTH: usize = 10;
-pub const BOARD_HEIGHT: usize = 20;
-
-pub enum LRD {
+pub enum LR {
     Left,
     Right,
+}
+
+impl LR {
+    pub fn to_lrd(self) -> LRD {
+        LRD::LR(self)
+    }
+}
+
+pub enum LRD {
+    LR(LR),
     Down,
 }
 
 impl LRD {
     pub fn delta(&self) -> (i32, i32) {
         match self {
-            LRD::Left => (-1, 0),
-            LRD::Right => (1, 0),
+            LRD::LR(LR::Left)=>  (-1, 0),
+            LRD::LR(LR::Right) => (1, 0),
             LRD::Down => (0, 1),
         }
-     }
+    }
 }
