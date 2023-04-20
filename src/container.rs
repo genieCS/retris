@@ -92,10 +92,35 @@ impl Container {
         stop
     }
 
-    pub fn drop_down(&mut self) {
+    pub fn drop_down(&mut self) -> EventResult {
         let mut stopped = false;
         while !stopped {
             stopped = self.move_lrd(LRD::Down)
+        }
+        self.merge_block();
+        self.current = CurrentBlock {
+            block: Block::new(),
+            pos: Vec2::new(4, 0),
+        };
+        EventResult::Consumed(None)
+    }
+
+    pub fn handle_tick(&mut self) {
+        let stopped = self.move_lrd(LRD::Down);
+        if stopped {
+            self.merge_block();
+            self.current = CurrentBlock {
+                block: Block::new(),
+                pos: Vec2::new(4, 0),
+            };
+        }
+    }
+
+    fn merge_block(&mut self) {
+        for block in &self.current.block.shape.vectors() {
+            let x = self.current.pos.x + block.x;
+            let y = self.current.pos.y + block.y;
+            self.board[y][x] = self.current.block.color;
         }
     }
 
@@ -104,11 +129,12 @@ impl Container {
         EventResult::Consumed(None)
     }
 
-    pub fn rotate(&mut self) {
+    pub fn rotate(&mut self) -> EventResult {
         let can_rotate = self.current.can_rotate(&self.board);
         if can_rotate {
             self.current.rotate();
         }
+        EventResult::Consumed(None)
     }
 
     fn draw_background(&self, printer: &Printer) {
@@ -117,9 +143,13 @@ impl Container {
         }
         for j in 0..BOARD_HEIGHT {
             for i in 0..BOARD_WIDTH {
-                printer.print((2*i + self.x_padding, j + self.y_padding + 1), "|_");
+                printer.with_color(self.board[j][i], |printer| {
+                    printer.print((2*i + self.x_padding + 1, j + self.y_padding + 1), "_|");
+                });
             }
-            printer.print((20+self.x_padding, j + self.y_padding + 1), "|");
+            printer.with_color(ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK), |printer| {
+                printer.print((self.x_padding, j + self.y_padding + 1), "|");
+            });
         }
     }
 
@@ -156,6 +186,8 @@ impl View for Container {
             Event::Key(Key::Left)  => self.handle_lrd(LRD::Left),
             Event::Key(Key::Right) => self.handle_lrd(LRD::Right),
             Event::Key(Key::Down) => self.handle_lrd(LRD::Down),
+            Event::Key(Key::Up) => self.rotate(),
+            Event::Char(' ') => self.drop_down(),
             _ => EventResult::Ignored,
         }
     }

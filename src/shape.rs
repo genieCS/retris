@@ -112,9 +112,9 @@ impl ShapeTr for S2 {
     fn vectors(&self) -> Positions {
         match self {
             S2::S2_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
-            S2::S2_2 => vec![Vec2::new(1,0),Vec2::new(2,1),Vec2::new(0,1),Vec2::new(1,1)],
+            S2::S2_2 => vec![Vec2::new(1,0),Vec2::new(2,0),Vec2::new(0,1),Vec2::new(1,1)],
             S2::S2_3 => vec![Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
-            S2::S2_4 => vec![Vec2::new(0,0),Vec2::new(1,1),Vec2::new(0,1),Vec2::new(2,1)],
+            S2::S2_4 => vec![Vec2::new(0,0),Vec2::new(1,1),Vec2::new(1,0),Vec2::new(2,1)],
         }
     }
 
