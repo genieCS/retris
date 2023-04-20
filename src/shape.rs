@@ -50,7 +50,7 @@ impl Shape {
         }
     }
 
-    fn rotate(&self) -> Shape {
+    pub fn rotate(&self) -> Shape {
         match self {
             Shape::S1(shape) => shape.rotate(),
             Shape::S2(shape) => shape.rotate(),
