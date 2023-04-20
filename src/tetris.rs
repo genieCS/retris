@@ -1,15 +1,21 @@
-use cursive::{
-    event::{Event, EventResult, Key},
-    View,
-    Vec2, Printer,
-};
 use crate::board::Board;
 use crate::current::BOARD_WIDTH;
 use crate::queue::Queue;
+use cursive::{
+    event::{Callback, Event, EventResult, Key},
+    views::Dialog,
+    Printer, Vec2, View,
+};
 
 pub struct Tetris {
     pub board: Board,
     pub queue: Queue,
+}
+
+impl Default for Tetris {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Tetris {
@@ -21,8 +27,14 @@ impl Tetris {
     }
 
     pub fn on_down(&mut self, is_drop: bool) -> EventResult {
-        let stopped = self.board.on_down(is_drop);
-        if stopped {
+        let (gameover, merged) = self.board.on_down(is_drop);
+        if gameover {
+            return EventResult::Consumed(Some(Callback::from_fn(move |s| {
+                s.add_layer(Dialog::info("Game Over!"));
+                s.set_fps(0);
+            })));
+        }
+        if merged {
             let block = self.queue.pop_and_spawn_new_block();
             self.board.insert_new_block(block);
         }
@@ -46,7 +58,7 @@ impl View for Tetris {
         match event {
             Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
             Event::Char(' ') => self.on_down(true),
-            _ => self.board.on_event(event)
+            _ => self.board.on_event(event),
         }
     }
 }

@@ -26,7 +26,7 @@ impl Current {
             let next_y =  xy.y as i32 + block.y as i32 + delta.1;
             if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || colors[next_y as usize][next_x as usize] != background
             {
-                return (false, stop);
+                return (false, false);
             }
             if next_y + 1 == BOARD_HEIGHT as i32 || next_y + 1 < BOARD_HEIGHT as i32 && colors[next_y as usize + 1][next_x as usize] != background
             {
@@ -36,17 +36,17 @@ impl Current {
         (true, stop)
     }
 
-    pub fn move_lrd(&mut self, lrd: LRD, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
+    pub fn move_lrd(&mut self, lrd: LRD, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> (bool, bool) {
         let (can_move, stop) = self.can_move_lrd(&lrd, colors);
         if !can_move {
-            return true;
+            return (false, stop)
         }
         let delta = lrd.delta();
         let x = self.pos.x as i32 + delta.0;
         let y = self.pos.y as i32 + delta.1;
         self.pos.x = x as usize;
         self.pos.y = y as usize;
-        stop
+        (true, stop)
     }
 
     pub fn can_rotate(&self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
