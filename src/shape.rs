@@ -113,8 +113,8 @@ impl ShapeTr for S2 {
         match self {
             S2::S2_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
             S2::S2_2 => vec![Vec2::new(1,0),Vec2::new(2,1),Vec2::new(0,1),Vec2::new(1,1)],
-            S2::S2_3 => vec![Vec2::new(2,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
-            S2::S2_4 => vec![Vec2::new(0,0),Vec2::new(1,1),Vec2::new(1,1),Vec2::new(2,1)],
+            S2::S2_3 => vec![Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
+            S2::S2_4 => vec![Vec2::new(0,0),Vec2::new(1,1),Vec2::new(0,1),Vec2::new(2,1)],
         }
     }
 
@@ -190,9 +190,9 @@ impl ShapeTr for S4 {
             S4::S4_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(2,1), Vec2::new(3,1)],
             S4::S4_2 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(0,1),Vec2::new(0,2), Vec2::new(0,3)],
             S4::S4_3 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(3,0), Vec2::new(3,1)],
-            S4::S4_4 => vec![Vec2::new(1,0),Vec2::new(1,1),Vec2::new(2,1),Vec2::new(3,1), Vec2::new(3,0)],
-            S4::S4_5 => vec![Vec2::new(0,3),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(2,1), Vec2::new(3,1)],
-            S4::S4_6 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(2,1), Vec2::new(3,1)],
+            S4::S4_4 => vec![Vec2::new(1,0),Vec2::new(1,1),Vec2::new(1,2),Vec2::new(1,3), Vec2::new(0,3)],
+            S4::S4_5 => vec![Vec2::new(3,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(2,1), Vec2::new(3,1)],
+            S4::S4_6 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(1,2), Vec2::new(1,3)],
             S4::S4_7 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(3,0), Vec2::new(0,1)],
             S4::S4_8 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(0,2),Vec2::new(0,3), Vec2::new(1,3)],
         }
