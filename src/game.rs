@@ -2,9 +2,8 @@ use crate::tetris::Tetris;
 
 use cursive::{
     Cursive, CursiveExt,
-    event::Event,
     view::Nameable,
-    views::{Dialog}, View,
+    views::{Dialog},
 };
 
 pub fn run() {
@@ -16,11 +15,6 @@ pub fn run() {
 
     siv.add_layer(view);
 
-    siv.add_global_callback(Event::Refresh, |s| {
-        s.call_on_name("tetris", |tetris: &mut Tetris| {
-            tetris.on_event(Event::Refresh)
-        });
-    });
     siv.set_fps(1);
 
     siv.run();

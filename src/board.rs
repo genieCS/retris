@@ -34,18 +34,22 @@ impl Board {
         }
     }
 
-    pub fn move_lrd(&mut self, lrd: LRD) -> bool {
+    pub fn move_lrd(&mut self, lrd: LRD) -> (bool, bool) {
         self.current.move_lrd(lrd, &self.colors)
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> bool {
+    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
         let mut stopped = false;
         let mut hit_bottom = is_drop;
+        let mut moved;
         while !stopped {
-            hit_bottom = self.move_lrd(LRD::Down);
+            (moved, hit_bottom)= self.move_lrd(LRD::Down);
+            if !moved {
+                return (true, true)
+            }
             stopped = hit_bottom || !is_drop;
         }
-        hit_bottom && self.merge_block()
+        (false, hit_bottom && self.merge_block())
     }
 
     pub fn insert_new_block(&mut self, block: Block) {
