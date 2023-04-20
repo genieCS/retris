@@ -2,22 +2,14 @@ use cursive::{
     View,
     Printer,
 };
-use crate::block::Block;
 
 
 pub struct Container {
-    blocks: Vec<Block>,
 }
 
 impl Container {
     pub fn new() -> Self {
-        let mut blocks = Vec::new();
-        for _ in 0..4 {
-            blocks.push(Block::new());
-        }
-        Self {
-            blocks,
-        }
+        Self {}
     }
 }
 
@@ -39,14 +31,6 @@ impl View for Container {
                 printer.print((2*i + x_padding, j + y_padding + 1), "|_");
             }
             printer.print((20+x_padding, j + y_padding + 1), "|");
-        }
-
-        for (i, b) in self.blocks.iter().enumerate() {
-            for pos in &b.shape {
-                printer.with_color(b.color, |printer| {
-                    printer.print((2*pos.x + 2, pos.y + 6*i + 6), "_");
-                });
-            }
         }
     }
 
