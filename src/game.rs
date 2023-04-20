@@ -8,8 +8,7 @@ pub fn run() {
 
     siv.add_global_callback('q', |s| s.quit());
 
-    let mut container = Container::new();
-    container.drop_down();
+    let container = Container::new();
     siv.add_layer(container);
     siv.run();
 }

@@ -1,4 +1,5 @@
 use cursive::{
+    event::{Event, EventResult, Key},
     View, Vec2,
     Printer, 
     theme::{Color, ColorStyle},
@@ -98,6 +99,11 @@ impl Container {
         }
     }
 
+    fn handle_lrd(&mut self, lrd: LRD) -> EventResult {
+        self.move_lrd(lrd);
+        EventResult::Consumed(None)
+    }
+
     pub fn rotate(&mut self) {
         let can_rotate = self.current.can_rotate(&self.board);
         if can_rotate {
@@ -143,5 +149,14 @@ impl View for Container {
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
         cursive::Vec2::new(2*BOARD_WIDTH + 3, BOARD_HEIGHT + 10)
+    }
+
+    fn on_event(&mut self, event: Event) -> EventResult {
+        match event {
+            Event::Key(Key::Left)  => self.handle_lrd(LRD::Left),
+            Event::Key(Key::Right) => self.handle_lrd(LRD::Right),
+            Event::Key(Key::Down) => self.handle_lrd(LRD::Down),
+            _ => EventResult::Ignored,
+        }
     }
 }
