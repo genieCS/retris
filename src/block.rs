@@ -5,7 +5,7 @@ use rand::Rng;
 use crate::shape::{Shape};
 
 
-
+#[derive(Clone, Debug)]
 pub struct Block {
     pub shape: Shape,
     pub color: ColorStyle,

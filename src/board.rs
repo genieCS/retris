@@ -2,7 +2,7 @@ use cursive::{
     event::{Event, EventResult, Key},
     View, Vec2,
     Printer, 
-    theme::{ColorStyle},
+    theme::{Color, ColorStyle},
 };
 use crate::block::Block;
 use crate::lrd::{ LR, LRD };
@@ -133,6 +133,7 @@ impl Board {
 impl View for Board {
     fn draw(&self, printer: &Printer) {
         self.draw_background(printer);
+        self.draw_hint(printer);
         self.draw_current_block(printer);
     }
 
@@ -173,6 +174,24 @@ impl Board {
             let x = xy.x as i32 + block.x as i32;
             let y = xy.y as i32 + block.y as i32;
                 printer.with_color(self.current.block.color, |printer| {
+                    printer.print((2*x as usize + self.x_padding + 1, y as usize + self.y_padding + 1), "_|");
+                });
+        }
+    }
+
+    fn draw_hint(&self, printer: &Printer) {
+        let mut hint = self.current.clone();
+        let mut stopped = false;
+        while !stopped {
+            let (moved, hit_bottom) = hint.move_lrd(LRD::Down, &self.colors);
+            stopped = hit_bottom || !moved;
+        }
+        let xy = hint.pos;
+        let hint_color = ColorStyle::new(Color::Rgb(50,50,50), Color::Rgb(200,200,200));
+        for block in &hint.block.shape.vectors() {
+            let x = xy.x as i32 + block.x as i32;
+            let y = xy.y as i32 + block.y as i32;
+                printer.with_color(hint_color, |printer| {
                     printer.print((2*x as usize + self.x_padding + 1, y as usize + self.y_padding + 1), "_|");
                 });
         }
