@@ -55,6 +55,7 @@ impl View for Tetris {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
+        println!("event occur");
         match event {
             Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
             Event::Char(' ') => self.on_down(true),

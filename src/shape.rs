@@ -17,11 +17,12 @@ pub enum Shape {
     S2(S2),
     S3(S3),
     S4(S4),
+    S5(S5),
 }
 
 impl Default for Shape {
     fn default() -> Self {
-        let shapes: [Shape; 4] = [Shape::S1(S1::S1_1), Shape::S2(S2::S2_1), Shape::S3(S3::S3_1), Shape::S4(S4::S4_1)];
+        let shapes: [Shape; 5] = [Shape::S1(S1::S1_1), Shape::S2(S2::S2_1), Shape::S3(S3::S3_1), Shape::S4(S4::S4_1), Shape::S5(S5::S5_1)];
         let mut shape = shapes[rand::thread_rng().gen_range(0..shapes.len())];
         let repeat = rand::thread_rng().gen_range(0..8);
         for _ in 0..repeat {
@@ -38,6 +39,7 @@ impl Shape {
             Shape::S2(shape) => shape.vectors(),
             Shape::S3(shape) => shape.vectors(),
             Shape::S4(shape) => shape.vectors(),
+            Shape::S5(shape) => shape.vectors(),
         }
     }
 
@@ -47,6 +49,7 @@ impl Shape {
             Shape::S2(shape) => shape.shuffle(),
             Shape::S3(shape) => shape.shuffle(),
             Shape::S4(shape) => shape.shuffle(),
+            Shape::S5(shape) => shape.shuffle(),
         }
     }
 
@@ -56,6 +59,7 @@ impl Shape {
             Shape::S2(shape) => shape.rotate(),
             Shape::S3(shape) => shape.rotate(),
             Shape::S4(shape) => shape.rotate(),
+            Shape::S5(shape) => shape.rotate(),
         }
     }
 }
@@ -221,6 +225,48 @@ impl ShapeTr for S4 {
             S4::S4_6 => Shape::S4(S4::S4_5),
             S4::S4_7 => Shape::S4(S4::S4_6),
             S4::S4_8 => Shape::S4(S4::S4_7),
+        }
+    }
+}
+
+//  S5_1      S5_2    S5_3     S5_4   
+//    _       _                    _
+//  _|_|_    |_|_     _ _ _      _|_|
+// |_|_|_|   |_|_|   |_|_|_|    |_|_|
+//        ,  |_|   ,   |_|    ,   |_|
+#[derive(Debug, Clone, Copy)]
+pub enum S5 {
+    S5_1,
+    S5_2,
+    S5_3,
+    S5_4,
+}
+
+impl ShapeTr for S5 {
+    fn vectors(&self) -> Positions {
+        match self {
+            S5::S5_1 => vec![Vec2::new(0,1),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(2,1)],
+            S5::S5_2 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
+            S5::S5_3 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(1,1)],
+            S5::S5_4 => vec![Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
+        }
+    }
+
+    fn shuffle(&self) -> Shape {
+        match self {
+            S5::S5_1 => Shape::S5(S5::S5_2),
+            S5::S5_2 => Shape::S5(S5::S5_3),
+            S5::S5_3 => Shape::S5(S5::S5_4),
+            S5::S5_4 => Shape::S5(S5::S5_1),
+        }
+    }
+
+    fn rotate(&self) -> Shape {
+        match self {
+            S5::S5_1 => Shape::S5(S5::S5_2),
+            S5::S5_2 => Shape::S5(S5::S5_3),
+            S5::S5_3 => Shape::S5(S5::S5_4),
+            S5::S5_4 => Shape::S5(S5::S5_1),
         }
     }
 }
