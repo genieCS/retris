@@ -41,6 +41,25 @@ impl CurrentBlock {
         self.pos.x = x as usize;
         self.pos.y = y as usize;
     }
+
+    fn can_rotate(&self, board: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
+        let next_block = self.block.shape.rotate();
+        let xy = self.pos;
+        let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
+        for block in &next_block.vectors() {
+            let next_x = xy.x  as i32 + block.x as i32;
+            let next_y =  xy.y as i32 + block.y as i32;
+            if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || board[next_y as usize][next_x as usize] != background
+            {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn rotate(&mut self) {
+        self.block.shape = self.block.shape.rotate();
+    }
 }
 
 pub struct Container {
@@ -76,6 +95,13 @@ impl Container {
         let mut stopped = false;
         while !stopped {
             stopped = self.move_lrd(LRD::Down)
+        }
+    }
+
+    pub fn rotate(&mut self) {
+        let can_rotate = self.current.can_rotate(&self.board);
+        if can_rotate {
+            self.current.rotate();
         }
     }
 
