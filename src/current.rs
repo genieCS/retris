@@ -10,6 +10,7 @@ pub const BOARD_HEIGHT: usize = 20;
 pub const BACKGROUND_FRONT: Color = Color::Rgb(0,0,0);
 pub const BACKGROUND_BACK: Color = Color::Rgb(255,255,255);
 
+#[derive(Clone, Debug)]
 pub struct Current {
     pub block: Block,
     pub pos: Vec2,
