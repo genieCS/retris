@@ -22,7 +22,7 @@ impl Current {
         let xy = self.pos;
         let mut stop = false;
         let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
-        for block in &self.block.shape.vectors() {
+        for block in &self.block.vectors() {
             let next_x = xy.x  as i32 + block.x as i32  + delta.0;
             let next_y =  xy.y as i32 + block.y as i32 + delta.1;
             if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || colors[next_y as usize][next_x as usize] != background
@@ -51,7 +51,7 @@ impl Current {
     }
 
     pub fn can_rotate(&self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
-        let next_block = self.block.shape.rotate();
+        let next_block = self.block.rotate();
         let xy = self.pos;
         let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
         for block in &next_block.vectors() {
@@ -68,7 +68,7 @@ impl Current {
     pub fn rotate(&mut self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) {
         let can_rotate = self.can_rotate(colors);
         if can_rotate {
-            self.block.shape = self.block.shape.rotate();
+            self.block = self.block.rotate();
         }
     }
 }

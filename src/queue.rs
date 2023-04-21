@@ -22,7 +22,7 @@ impl Queue {
     pub fn new(x_padding: usize) -> Self {
         let mut blocks = VecDeque::new();
         for _ in 0..3 {
-            blocks.push_back(Block::new());
+            blocks.push_back(Block::default());
         }
         Self {
             blocks,
@@ -32,7 +32,7 @@ impl Queue {
 
     pub fn pop_and_spawn_new_block(&mut self) -> Block {
         let block = self.blocks.pop_front().unwrap();
-        self.blocks.push_back(Block::new());
+        self.blocks.push_back(Block::default());
         block
     }
 
@@ -40,8 +40,8 @@ impl Queue {
         let x_padding = 2*self.x_padding + 8;
         let mut y_padding = 7;
         for block in &self.blocks {
-            for vector in &block.shape.vectors() {
-                printer.with_color(block.color, |printer| {
+            for vector in &block.vectors() {
+                printer.with_color(block.color(), |printer| {
                     printer.print((x_padding + 2*vector.x, y_padding + vector.y), "_|");
                 });
             }
