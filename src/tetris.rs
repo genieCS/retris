@@ -72,4 +72,11 @@ impl View for Tetris {
             _ => self.board.on_event(event),
         }
     }
+
+    fn take_focus(
+            &mut self,
+            source: cursive::direction::Direction,
+        ) -> Result<EventResult, cursive::view::CannotFocus> {
+        self.board.take_focus(source)
+    }
 }
