@@ -40,6 +40,16 @@ impl Tetris {
         }
         EventResult::Consumed(None)
     }
+
+    fn new_game(&mut self) -> EventResult {
+        self.board = Board::new();
+        self.queue = Queue::new(BOARD_WIDTH);
+        let block = self.queue.pop_and_spawn_new_block();
+        self.board.insert_new_block(block);
+        EventResult::Consumed(Some(Callback::from_fn(|s| {
+            s.set_fps(1);
+        })))
+    }
 }
 
 impl View for Tetris {
@@ -58,6 +68,7 @@ impl View for Tetris {
         match event {
             Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
             Event::Char(' ') => self.on_down(true),
+            Event::Char('n') => self.new_game(),
             _ => self.board.on_event(event),
         }
     }
