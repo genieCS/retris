@@ -10,6 +10,7 @@ use cursive::{
 pub struct Tetris {
     pub board: Board,
     pub queue: Queue,
+    pub is_paused: bool,
 }
 
 impl Default for Tetris {
@@ -23,15 +24,20 @@ impl Tetris {
         Tetris {
             board: Board::new(),
             queue: Queue::new(BOARD_WIDTH),
+            is_paused: false,
         }
     }
 
     pub fn on_down(&mut self, is_drop: bool) -> EventResult {
+        if self.is_paused {
+            return EventResult::Consumed(None);
+        }
         let (gameover, merged) = self.board.on_down(is_drop);
         if gameover {
+            self.is_paused = true;
+            self.board.toggle_pause(true);
             return EventResult::Consumed(Some(Callback::from_fn(move |s| {
                 s.add_layer(Dialog::info("Game Over!"));
-                s.set_fps(0);
             })));
         }
         if merged {
@@ -46,9 +52,15 @@ impl Tetris {
         self.queue = Queue::new(BOARD_WIDTH);
         let block = self.queue.pop_and_spawn_new_block();
         self.board.insert_new_block(block);
-        EventResult::Consumed(Some(Callback::from_fn(|s| {
-            s.set_fps(1);
-        })))
+        self.is_paused = false;
+        self.board.toggle_pause(false);
+        EventResult::Consumed(None)
+    }
+
+    fn stop_and_resume(&mut self) -> EventResult {
+        self.is_paused = !self.is_paused;
+        self.board.toggle_pause(self.is_paused);
+        EventResult::Consumed(None)
     }
 }
 
@@ -69,6 +81,7 @@ impl View for Tetris {
             Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
             Event::Char(' ') => self.on_down(true),
             Event::Char('n') => self.new_game(),
+            Event::Char('s') => self.stop_and_resume(),
             _ => self.board.on_event(event),
         }
     }
