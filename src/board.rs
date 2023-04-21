@@ -140,12 +140,12 @@ impl Board {
     pub fn toggle_pause(&mut self, is_paused: bool) {
         self.is_paused = is_paused;
     }
-
 }
 
 impl View for Board {
     fn draw(&self, printer: &Printer) {
         self.draw_background(printer);
+        self.draw_dangerous(printer);
         self.draw_hint(printer);
         self.draw_current_block(printer);
     }
@@ -207,6 +207,29 @@ impl Board {
                 printer.with_color(hint_color, |printer| {
                     printer.print((2*x as usize + self.x_padding + 1, y as usize + self.y_padding + 1), "_|");
                 });
+        }
+    }
+
+    fn draw_dangerous(&self, printer: &Printer) {
+        let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
+        let background_color = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
+        let mut warning_stage = false;
+        for j in 0..3 {
+            for i in 0..BOARD_WIDTH {
+                if self.colors[j][i] != background_color {
+                    warning_stage = true;
+                }
+            }
+        }
+        if !warning_stage {
+            return;
+        }
+        for j in 0..3 {
+            for i in 0..BOARD_WIDTH {
+                printer.with_color(warning_color, |printer| {
+                    printer.print((2*i + self.x_padding + 1, j + self.y_padding + 1), "_|");
+                });
+            }
         }
     }
 }
