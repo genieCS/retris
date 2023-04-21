@@ -26,7 +26,7 @@ impl Board {
     pub fn new() -> Self {
         Self {
             current: Current {
-                block: Block::new(),
+                block: Block::default(),
                 pos: Vec2::new(4, 0),
             },
             colors: [[ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK); BOARD_WIDTH]; BOARD_HEIGHT],
@@ -117,10 +117,10 @@ impl Board {
     }
 
     fn fill_board_with_current_block(&mut self) {
-        for block in &self.current.block.shape.vectors() {
+        for block in &self.current.block.vectors() {
             let x = self.current.pos.x + block.x;
             let y = self.current.pos.y + block.y;
-            self.colors[y][x] = self.current.block.color;
+            self.colors[y][x] = self.current.block.color();
         }
     }
 
@@ -183,10 +183,10 @@ impl Board {
 
     fn draw_current_block(&self, printer: &Printer) {
         let xy = self.current.pos;
-        for block in &self.current.block.shape.vectors() {
+        for block in &self.current.block.vectors() {
             let x = xy.x as i32 + block.x as i32;
             let y = xy.y as i32 + block.y as i32;
-                printer.with_color(self.current.block.color, |printer| {
+                printer.with_color(self.current.block.color(), |printer| {
                     printer.print((2*x as usize + self.x_padding + 1, y as usize + self.y_padding + 1), "_|");
                 });
         }
@@ -201,7 +201,7 @@ impl Board {
         }
         let xy = hint.pos;
         let hint_color = ColorStyle::new(Color::Rgb(50,50,50), Color::Rgb(200,200,200));
-        for block in &hint.block.shape.vectors() {
+        for block in &hint.block.vectors() {
             let x = xy.x as i32 + block.x as i32;
             let y = xy.y as i32 + block.y as i32;
                 printer.with_color(hint_color, |printer| {
