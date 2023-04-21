@@ -66,6 +66,12 @@ pub fn run() {
             tetris.on_event(Event::Char('n'));
         });
     });
+    siv.add_global_callback(Event::Char('s'), |s| {
+        s.call_on_name("tetris", |tetris: &mut Tetris| {
+            tetris.on_event(Event::Char('s'));
+        });
+    });
+
 
     siv.add_layer(view);
 

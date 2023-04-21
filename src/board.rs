@@ -13,6 +13,7 @@ pub struct Board {
     colors: [[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT],
     x_padding: usize,
     y_padding: usize,
+    is_paused: bool,
 }
 
 impl Default for Board {
@@ -31,11 +32,16 @@ impl Board {
             colors: [[ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK); BOARD_WIDTH]; BOARD_HEIGHT],
             x_padding: 1,
             y_padding: 5,
+            is_paused: false,
         }
     }
 
     pub fn move_lrd(&mut self, lrd: LRD) -> (bool, bool) {
-        self.current.move_lrd(lrd, &self.colors)
+        if self.is_paused {
+            (false, false)
+        } else {
+            self.current.move_lrd(lrd, &self.colors)
+        }
     }
 
     pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
@@ -124,8 +130,15 @@ impl Board {
     }
 
     pub fn rotate(&mut self) -> EventResult {
+        if self.is_paused {
+            return EventResult::Consumed(None);
+        }
         self.current.rotate(&self.colors);
         EventResult::Consumed(None)
+    }
+
+    pub fn toggle_pause(&mut self, is_paused: bool) {
+        self.is_paused = is_paused;
     }
 
 }
