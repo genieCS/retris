@@ -50,17 +50,39 @@ impl Current {
         (true, stop)
     }
 
-    pub fn can_rotate(&self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
+    pub fn can_rotate(&mut self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
         let next_block = self.block.rotate();
-        let xy = self.pos;
         let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
-        for block in &next_block.vectors() {
-            let next_x = xy.x  as i32 + block.x as i32;
-            let next_y =  xy.y as i32 + block.y as i32;
-            if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || colors[next_y as usize][next_x as usize] != background
-            {
-                return false;
+        let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
+        let mut possible = false;
+        let mut chance = 4;
+        while !possible && chance > 0 {
+            possible = true;
+            for block in &next_block.vectors() {
+                let next_x = self.pos.x  as i32 + block.x as i32;
+                let next_y = self.pos.y as i32 + block.y as i32;
+                if next_x < 0 {
+                    possible = false;
+                    self.pos.x += 1;
+                    break;
+                } else if next_x >= BOARD_WIDTH as i32 {
+                    possible = false;
+                    self.pos.x -= 1;
+                    break;
+                } else if next_y < 0 {
+                    possible = false;
+                    self.pos.y += 1;
+                    break;
+                } else if next_y >= BOARD_HEIGHT as i32 {
+                    possible = false;
+                    self.pos.y -= 1;
+                    break;
+                } else if colors[next_y as usize][next_x as usize] != background && colors[next_y as usize][next_x as usize] != warning_color {
+                    possible = false;
+                    break;
+                }
             }
+            chance -= 1;
         }
         true
     }
