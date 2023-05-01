@@ -78,6 +78,15 @@ impl Block {
     }
 }
 
+impl IntoIterator for Block {
+    type Item = Vec2;
+    type IntoIter = std::vec::IntoIter<Vec2>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.vectors().into_iter()
+    }
+}
+
 //    SI_1      SI_2
 //  _ _ _ _      _
 // |_|_|_|_| ,  |_|
