@@ -102,8 +102,8 @@ pub enum SI {
 impl BlockTr for SI {
     fn vectors(&self) -> Positions {
         match self {
-            SI::SI_1 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(3,0)],
-            SI::SI_2 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(0,2),Vec2::new(0,3)],
+            SI::SI_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(0,2),Vec2::new(0,3)],
+            SI::SI_2 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(3,0)],
         }
     }
 
@@ -184,11 +184,11 @@ impl BlockTr for ST {
     }
 }
 
-//  SS_1     SS_2 
-//  _         _ _ 
-// |_|_     _|_|_|
-// |_|_|   |_|_|  
-//   |_|,         
+//   SS_1       SS_2
+//    _ _       _
+//  _|_|_|     |_|_ 
+// |_|_|       |_|_|  
+//         ,     |_|
 #[derive(Debug, Clone, Copy)]
 pub enum SS {
     SS_1,
@@ -198,8 +198,8 @@ pub enum SS {
 impl BlockTr for SS {
     fn vectors(&self) -> Positions {
         match self {
-            SS::SS_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
-            SS::SS_2 => vec![Vec2::new(1,0),Vec2::new(2,0),Vec2::new(0,1),Vec2::new(1,1)],
+            SS::SS_1 => vec![Vec2::new(1,0),Vec2::new(2,0),Vec2::new(0,1),Vec2::new(1,1)],
+            SS::SS_2 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
         }
     }
 
