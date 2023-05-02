@@ -1,5 +1,4 @@
 use cursive::{
-    Vec2,
     theme::{ColorStyle},
 };
 use std::ops::Index;
@@ -7,14 +6,27 @@ use crate::current::Current;
 
 pub struct ColorGrid {
     colors: Vec<Vec<ColorStyle>>,
-    pub background_color: ColorStyle,
+    pub background_color: (ColorStyle, ColorStyle),
     pub warning_color: ColorStyle,
 }
 
 impl ColorGrid {
-    pub fn new(background_color: ColorStyle, warning_color: ColorStyle, width: usize, height: usize) -> Self {
+    pub fn new(background_color: (ColorStyle, ColorStyle), warning_color: ColorStyle, width: usize, height: usize) -> Self {
+        let mut colors = Vec::with_capacity(height);
+        for h in 0..height {
+            let mut row = Vec::with_capacity(width);
+            for w in 0..width {
+                    let color = if (w + h) % 2 == 0 {
+                        background_color.0
+                    } else {
+                        background_color.1
+                    };
+                    row.push(color);
+            }
+            colors.push(row);
+        }
         Self {
-            colors: vec![vec![background_color; width]; height],
+            colors,
             background_color,
             warning_color,
         }
@@ -28,16 +40,27 @@ impl ColorGrid {
         self.colors.len()
     }
 
+    fn set_background(&mut self, x: usize, y: usize) {
+        let color = if (x + y) % 2 == 0 {
+            self.background_color.0
+        } else {
+            self.background_color.1
+        };
+        self.colors[y][x] = color;
+    }
+
     pub fn clear(&mut self) {
-        for row in &mut self.colors {
-            for color in row.iter_mut() {
-                *color = self.background_color;
+        for x in 0..self.width() {
+            for y in 0..self.height() {
+                self.set_background(x, y);
             }
         }
     }
 
-    pub fn is_occupied(&self, pos: Vec2) -> bool {
-        self.colors[pos.y][pos.x] != self.background_color && self.colors[pos.y][pos.x] != self.warning_color
+    pub fn is_occupied(&self, x: usize, y: usize) -> bool {
+        self.colors[y][x] != self.background_color.0 && 
+        self.colors[y][x] != self.background_color.1 &&
+        self.colors[y][x] != self.warning_color
     }
 
     pub fn merge_block(&mut self, current: &Current) -> bool {
@@ -54,16 +77,17 @@ impl ColorGrid {
 
     fn remove_rows_if_possible(&mut self) {
         let mut rows_to_remove = Vec::new();
-        for (i, row) in self.colors.iter_mut().enumerate().rev() {
+        for _y in 0..self.height() {
+            let y = self.height() - _y - 1;
             let mut remove = true;
-            for cell in row.iter() {
-                if cell == &self.background_color {
+            for x in 0..self.width() {
+                if !self.is_occupied(x, y) {
                     remove = false;
                     break;
                 }
             }
             if remove {
-                rows_to_remove.push(i);
+                rows_to_remove.push(y);
             }
         }
         self.remove_rows(rows_to_remove);
@@ -91,7 +115,9 @@ impl ColorGrid {
             check_y -= 1;
         }
         while fill_y > 0 {
-            self.colors[fill_y] = vec![self.background_color; self.width()];
+            for x in 0..self.width() {
+                self.set_background(x, fill_y);
+            }
             fill_y -= 1;
         }
     }
