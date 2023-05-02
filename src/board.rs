@@ -19,7 +19,10 @@ pub struct Board {
 impl Default for Board {
     fn default() -> Self {
         Self::new(
-            ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(255,255,255)),
+            (
+                ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,0,0)),
+                ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(30,30,30)),
+            ),
             ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0)),
             10,
             20)
@@ -27,7 +30,7 @@ impl Default for Board {
 }
 
 impl Board {
-    pub fn new(background_color: ColorStyle, warning_color: ColorStyle, width: usize, height: usize) -> Self {
+    pub fn new(background_color: (ColorStyle, ColorStyle), warning_color: ColorStyle, width: usize, height: usize) -> Self {
         Self {
             current: Current::new(
                 Block::default(),
@@ -90,9 +93,8 @@ impl View for Board {
     fn draw(&self, printer: &Printer) {
         self.draw_background(printer);
         self.draw_dangerous(printer);
-        let hint_color = ColorStyle::new(Color::Rgb(50,50,50), Color::Rgb(200,200,200));
-        self.draw_block(&self.current.hint(&self.colors),hint_color, printer);
-        self.draw_block(&self.current, self.current.color(), printer);
+        self.draw_hint(&self.current.hint(&self.colors), printer);
+        self.draw_block(&self.current, printer);
     }
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
@@ -115,25 +117,28 @@ impl Board {
     fn draw_background(&self, printer: &Printer) {
         let width = self.colors.width();
         let height = self.colors.height();
-        for i in 0..width {
-            printer.print((2*i + 1, 0), "_");
-        }
         for j in 0..height {
             for i in 0..width {
                 printer.with_color(self.colors[j][i], |printer| {
-                    printer.print((2*i + 1, j + 1), "_|");
+                    printer.print((2*i, j), "  ");
                 });
             }
-            printer.with_color(self.colors.background_color, |printer| {
-                printer.print((0, j + 1), "|");
-            });
         }
     }
 
-    fn draw_block(&self, block: &Current, color: ColorStyle, printer: &Printer) {
+    fn draw_block(&self, block: &Current, printer: &Printer) {
+        for cell in block {
+                printer.with_color(block.color(), |printer| {
+                    printer.print((2*cell.x, cell.y), "  ");
+                });
+        }
+    }
+
+    fn draw_hint(&self, block: &Current, printer: &Printer) {
+        let color = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(0,0,0));
         for cell in block {
                 printer.with_color(color, |printer| {
-                    printer.print((2*cell.x as usize + 1, cell.y as usize + 1), "_|");
+                    printer.print((2*cell.x, cell.y), "░░");
                 });
         }
     }
@@ -143,7 +148,7 @@ impl Board {
         let mut warning_stage = false;
         for j in 0..3 {
             for i in 0..width {
-                if self.colors[j][i] != self.colors.background_color {
+                if self.colors.is_occupied(i, j) {
                     warning_stage = true;
                     break;
                 }
@@ -158,7 +163,7 @@ impl Board {
         for j in 0..3 {
             for i in 0..width {
                 printer.with_color(self.colors.warning_color, |printer| {
-                    printer.print((2*i + 1, j + 1), "_|");
+                    printer.print((2*i, j), "  ");
                 });
             }
         }

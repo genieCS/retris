@@ -42,11 +42,11 @@ pub fn new(block: Block, pos: Vec2) -> Self {
         for cell in self {
             let next_x = cell.x as i32 + delta.0;
             let next_y =  cell.y as i32 + delta.1;
-            if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || colors.is_occupied(Vec2::new(next_x as usize,next_y as usize))
+            if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || colors.is_occupied(next_x as usize, next_y as usize)
             {
                 return (false, false);
             }
-            if next_y + 1 == board_height || colors.is_occupied(Vec2::new(next_x as usize, next_y as usize + 1))
+            if next_y + 1 == board_height || colors.is_occupied(next_x as usize, next_y as usize + 1)
             {
                 stop = true;
             }
@@ -88,7 +88,7 @@ pub fn new(block: Block, pos: Vec2) -> Self {
                     possible = false;
                     self.pos.y -= 1;
                     break;
-                } else if colors.is_occupied(Vec2::new(next_y as usize,next_x as usize)) {
+                } else if colors.is_occupied(next_x as usize, next_y as usize) {
                     possible = false;
                     break;
                 }

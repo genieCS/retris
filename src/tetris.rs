@@ -25,7 +25,10 @@ impl Default for Tetris {
 
 impl Tetris {
     pub fn new() -> Tetris {
-        let background_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(255,255,255));
+        let background_color = (
+            ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,0,0)),
+            ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(30,30,30)),
+        );
         let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
         let mut manual = Manual::new();
         let mut board = Board::new(background_color, warning_color, 10, 20);
