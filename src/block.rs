@@ -87,12 +87,12 @@ impl IntoIterator for Block {
     }
 }
 
-//    SI_1      SI_2
-//  _ _ _ _      _
-// |_|_|_|_| ,  |_|
-//              |_|
-//              |_|
-//              |_|
+//  SI_1     SI_2
+//   _       _ _ _ _  
+//  |_|   , |_|_|_|_| 
+//  |_|
+//  |_|
+//  |_|
 #[derive(Debug, Clone, Copy)]
 pub enum SI {
     SI_1,
