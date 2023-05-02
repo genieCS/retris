@@ -1,14 +1,11 @@
 use crate::block::Block;
+use crate::color_grid::ColorGrid;
 use crate::lrd::LRD;
 use cursive::{
     Vec2,
-    theme::{Color, ColorStyle},
+    theme::ColorStyle,
 };
 
-pub const BOARD_WIDTH: usize = 10;
-pub const BOARD_HEIGHT: usize = 20;
-pub const BACKGROUND_FRONT: Color = Color::Rgb(0,0,0);
-pub const BACKGROUND_BACK: Color = Color::Rgb(255,255,255);
 
 #[derive(Clone, Debug)]
 pub struct Current {
@@ -17,27 +14,14 @@ pub struct Current {
 }
 
 impl Current {
-    pub fn can_move_lrd(&self, lrd: &LRD, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> (bool, bool) {
-        let delta = lrd.delta();
-        let xy = self.pos;
-        let mut stop = false;
-        let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
-        for block in &self.block.vectors() {
-            let next_x = xy.x  as i32 + block.x as i32  + delta.0;
-            let next_y =  xy.y as i32 + block.y as i32 + delta.1;
-            if next_x < 0 || next_x >= BOARD_WIDTH as i32 || next_y < 0 || next_y >= BOARD_HEIGHT as i32 || colors[next_y as usize][next_x as usize] != background
-            {
-                return (false, false);
-            }
-            if next_y + 1 == BOARD_HEIGHT as i32 || next_y + 1 < BOARD_HEIGHT as i32 && colors[next_y as usize + 1][next_x as usize] != background
-            {
-                stop = true;
-            }
+pub fn new(block: Block, pos: Vec2) -> Self {
+        Self {
+            block,
+            pos,
         }
-        (true, stop)
     }
 
-    pub fn move_lrd(&mut self, lrd: LRD, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> (bool, bool) {
+    pub fn move_lrd(&mut self, lrd: LRD, colors: &ColorGrid) -> (bool, bool) {
         let (can_move, stop) = self.can_move_lrd(&lrd, colors);
         if !can_move {
             return (false, stop)
@@ -50,22 +34,49 @@ impl Current {
         (true, stop)
     }
 
-    pub fn can_rotate(&mut self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) -> bool {
+    fn can_move_lrd(&self, lrd: &LRD, colors: &ColorGrid) -> (bool, bool) {
+        let delta = lrd.delta();
+        let mut stop = false;
+        let board_width = colors.width() as i32;
+        let board_height = colors.height() as i32;
+        for cell in self {
+            let next_x = cell.x as i32 + delta.0;
+            let next_y =  cell.y as i32 + delta.1;
+            if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || colors.is_occupied(Vec2::new(next_x as usize,next_y as usize))
+            {
+                return (false, false);
+            }
+            if next_y + 1 == board_height || colors.is_occupied(Vec2::new(next_x as usize, next_y as usize + 1))
+            {
+                stop = true;
+            }
+        }
+        (true, stop)
+    }
+
+    pub fn rotate(&mut self, colors: &ColorGrid) {
+        let can_rotate = self.can_rotate(colors);
+        if can_rotate {
+            self.block = self.block.rotate();
+        }
+    }
+
+    fn can_rotate(&mut self, colors: &ColorGrid) -> bool {
         let next_block = self.block.rotate();
-        let background = ColorStyle::new(BACKGROUND_FRONT, BACKGROUND_BACK);
-        let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
         let mut possible = false;
         let mut chance = 4;
+        let board_width = colors.width() as i32;
+        let board_height = colors.height() as i32;
         while !possible && chance > 0 {
             possible = true;
-            for block in &next_block.vectors() {
-                let next_x = self.pos.x  as i32 + block.x as i32;
-                let next_y = self.pos.y as i32 + block.y as i32;
+            for cell in next_block {
+                let next_x = self.pos.x  as i32 + cell.x as i32;
+                let next_y = self.pos.y as i32 + cell.y as i32;
                 if next_x < 0 {
                     possible = false;
                     self.pos.x += 1;
                     break;
-                } else if next_x >= BOARD_WIDTH as i32 {
+                } else if next_x >= board_width {
                     possible = false;
                     self.pos.x -= 1;
                     break;
@@ -73,11 +84,11 @@ impl Current {
                     possible = false;
                     self.pos.y += 1;
                     break;
-                } else if next_y >= BOARD_HEIGHT as i32 {
+                } else if next_y >= board_height {
                     possible = false;
                     self.pos.y -= 1;
                     break;
-                } else if colors[next_y as usize][next_x as usize] != background && colors[next_y as usize][next_x as usize] != warning_color {
+                } else if colors.is_occupied(Vec2::new(next_y as usize,next_x as usize)) {
                     possible = false;
                     break;
                 }
@@ -87,10 +98,32 @@ impl Current {
         true
     }
 
-    pub fn rotate(&mut self, colors: &[[ColorStyle; BOARD_WIDTH]; BOARD_HEIGHT]) {
-        let can_rotate = self.can_rotate(colors);
-        if can_rotate {
-            self.block = self.block.rotate();
+    pub fn color(&self) -> ColorStyle {
+        self.block.color()
+    }
+
+    pub fn hint(&self, colors: &ColorGrid) -> Current {
+        let mut hint = self.clone();
+        let mut stopped = false;
+        while !stopped {
+            let (moved, hit_bottom) = hint.move_lrd(LRD::Down, colors);
+            stopped = hit_bottom || !moved;
         }
+        hint
+    }
+}
+
+impl IntoIterator for &Current {
+    type Item = Vec2;
+    type IntoIter = std::vec::IntoIter<Vec2>;
+
+
+    fn into_iter(self) -> Self::IntoIter {
+        let pos = self.pos;
+        self.block.into_iter().map(|cell| {
+            let x = pos.x + cell.x;
+            let y = pos.y + cell.y;
+            Vec2::new(x, y)
+        }).collect::<Vec<Vec2>>().into_iter()
     }
 }
