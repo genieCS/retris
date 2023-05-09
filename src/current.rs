@@ -14,7 +14,38 @@ pub struct Current {
 }
 
 impl Current {
-pub fn new(block: Block, pos: Vec2) -> Self {
+    pub fn new(block: Block, _pos: Vec2, board_width: usize, board_height: usize) -> Self {
+        let mut pos = _pos;
+        let mut chance = 4;
+        while chance > 0 {
+            let mut possible = true;
+            for cell in block.cells() {
+                let x = pos.x as i32 + cell.0;
+                let y = pos.y as i32 + cell.1;
+                if x < 0 {
+                    pos.x += 1;
+                    possible = false;
+                    break;
+                } else if x >= board_width as i32 {
+                    pos.x -= 1;
+                    possible = false;
+                    break;
+                } else if y < 0 {
+                    pos.y += 1;
+                    possible = false;
+                    break;
+                } else if y >= board_height  as i32{
+                    pos.y -= 1;
+                    possible = false;
+                    break;
+                }
+            }
+            if possible {
+                break;
+            }
+            chance -= 1;
+        }
+
         Self {
             block,
             pos,
@@ -55,23 +86,15 @@ pub fn new(block: Block, pos: Vec2) -> Self {
     }
 
     pub fn rotate(&mut self, colors: &ColorGrid) {
-        let can_rotate = self.can_rotate(colors);
-        if can_rotate {
-            self.block = self.block.rotate();
-        }
-    }
-
-    fn can_rotate(&mut self, colors: &ColorGrid) -> bool {
-        let next_block = self.block.rotate();
-        let mut possible = false;
+        let next = self.block.rotate();
         let mut chance = 4;
         let board_width = colors.width() as i32;
         let board_height = colors.height() as i32;
-        while !possible && chance > 0 {
-            possible = true;
-            for cell in next_block {
-                let next_x = self.pos.x  as i32 + cell.x as i32;
-                let next_y = self.pos.y as i32 + cell.y as i32;
+        while chance > 0 {
+            let mut possible = true;
+            for cell in next.cells() {
+                let next_x = self.pos.x  as i32 + cell.0 as i32;
+                let next_y = self.pos.y as i32 + cell.1 as i32;
                 if next_x < 0 {
                     possible = false;
                     self.pos.x += 1;
@@ -93,9 +116,14 @@ pub fn new(block: Block, pos: Vec2) -> Self {
                     break;
                 }
             }
+            if possible {
+                break;
+            }
             chance -= 1;
         }
-        true
+        if chance > 0 {
+            self.block = next;
+        }
     }
 
     pub fn color(&self) -> ColorStyle {
@@ -120,10 +148,10 @@ impl IntoIterator for &Current {
 
     fn into_iter(self) -> Self::IntoIter {
         let pos = self.pos;
-        self.block.into_iter().map(|cell| {
-            let x = pos.x + cell.x;
-            let y = pos.y + cell.y;
-            Vec2::new(x, y)
+        self.block.cells().into_iter().map(|cell| {
+            let x = pos.x as i32 + cell.0;
+            let y = pos.y as i32 + cell.1;
+            Vec2::new(x as usize, y as usize)
         }).collect::<Vec<Vec2>>().into_iter()
     }
 }
