@@ -1,324 +1,104 @@
 use cursive::{
-    Vec2,
-    theme::{Color, ColorStyle},
+    theme::{BaseColor, Color, ColorStyle},
 };
 use rand::Rng;
 
-type Positions = Vec<Vec2>;
+type Pos = (i32, i32);
 
-trait BlockTr {
-    fn vectors(&self) -> Positions;
 
-    fn rotate(&self) -> Block;
-
-    fn color(&self) -> ColorStyle;
+#[derive(Clone, Debug)]
+pub struct Block {
+    shape: Shape,
+    rotation: Rotation,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum Block {
-    SI(SI),
-    SO(SO),
-    ST(ST),
-    SS(SS),
-    SZ(SZ),
-    SJ(SJ),
-    SL(SL),
-}
-
-impl Default for Block {
-    fn default() -> Self {
-        let blocks: [Block; 7] = [
-            Block::SI(SI::SI_1),
-            Block::SO(SO::SO_1),
-            Block::ST(ST::ST_1),
-            Block::SS(SS::SS_1),
-            Block::SZ(SZ::SZ_1),
-            Block::SJ(SJ::SJ_1),
-            Block::SL(SL::SL_1),
-            ];
-        blocks[rand::thread_rng().gen_range(0..blocks.len())]
-    }
-}
 
 impl Block {
-    pub fn vectors(&self) -> Positions {
-        match self {
-            Block::SI(block) => block.vectors(),
-            Block::SO(block) => block.vectors(),
-            Block::ST(block) => block.vectors(),
-            Block::SS(block) => block.vectors(),
-            Block::SZ(block) => block.vectors(),
-            Block::SJ(block) => block.vectors(),
-            Block::SL(block) => block.vectors(),
+    pub fn default() -> Self {
+        Self {
+            shape: Shape::random(),
+            rotation: Rotation::R0,
+        }
+    }
+    pub fn cells(&self) -> Vec<Pos> {
+        match self.rotation {
+            Rotation::R0 => self.shape.cells(),
+            Rotation::R90 => self.shape.cells().into_iter().map(|(x,y)| (-y,x)).collect(),
+            Rotation::R180 => self.shape.cells().into_iter().map(|(x,y)| (-x,-y)).collect(),
+            Rotation::R270 => self.shape.cells().into_iter().map(|(x,y)| (y,-x)).collect(),
         }
     }
 
     pub fn rotate(&self) -> Block {
-        match self {
-            Block::SI(block) => block.rotate(),
-            Block::SO(block) => block.rotate(),
-            Block::ST(block) => block.rotate(),
-            Block::SS(block) => block.rotate(),
-            Block::SZ(block) => block.rotate(),
-            Block::SJ(block) => block.rotate(),
-            Block::SL(block) => block.rotate(),
+        match (&self.shape, &self.rotation) {
+            (Shape::O, _) => return self.clone(),
+            (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
+            (_,Rotation::R90) => Block { shape: self.shape.clone(), rotation: Rotation::R180 },
+            (_,Rotation::R180) => Block { shape: self.shape.clone(), rotation: Rotation::R270 },
+            (_,Rotation::R270) => Block { shape: self.shape.clone(), rotation: Rotation::R0 },
         }
     }
 
     pub fn color(&self) -> ColorStyle {
-        match self {
-            Block::SI(block) => block.color(),
-            Block::SO(block) => block.color(),
-            Block::ST(block) => block.color(),
-            Block::SS(block) => block.color(),
-            Block::SZ(block) => block.color(),
-            Block::SJ(block) => block.color(),
-            Block::SL(block) => block.color(),
+        match self.shape {
+            Shape::I => ColorStyle::new(Color::Dark(BaseColor::Blue), Color::Dark(BaseColor::Blue)),
+            Shape::O => ColorStyle::new(Color::Dark(BaseColor::Yellow), Color::Dark(BaseColor::Yellow)),
+            Shape::T => ColorStyle::new(Color::Dark(BaseColor::Magenta), Color::Dark(BaseColor::Magenta)),
+            Shape::S => ColorStyle::new(Color::Dark(BaseColor::Green), Color::Dark(BaseColor::Green)),
+            Shape::Z => ColorStyle::new(Color::Dark(BaseColor::Red), Color::Dark(BaseColor::Red)),
+            Shape::J => ColorStyle::new(Color::Dark(BaseColor::Cyan), Color::Dark(BaseColor::Cyan)),
+            Shape::L => ColorStyle::new(Color::Dark(BaseColor::White), Color::Dark(BaseColor::White)),
         }
     }
 }
 
-impl IntoIterator for Block {
-    type Item = Vec2;
-    type IntoIter = std::vec::IntoIter<Vec2>;
+//       I         O         T           S           Z          J        L
+//                    
+//   _ _ _ _      _ _        _          _ _       _ _        _             _  
+//  |_|_|_|_|    |_|_|     _|_|_      _|_|_|     |_|_|_     |_|_ _     _ _|_|  
+//               |_|_|    |_|_|_|    |_|_|         |_|_|    |_|_|_|   |_|_|_| 
+#[derive(Clone, Debug)]
+enum Shape {
+    I,
+    O,
+    T,
+    S,
+    Z,
+    J,
+    L,
+}  
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.vectors().into_iter()
-    }
-}
-
-//  SI_1     SI_2
-//   _       _ _ _ _  
-//  |_|   , |_|_|_|_| 
-//  |_|
-//  |_|
-//  |_|
-#[derive(Debug, Clone, Copy)]
-pub enum SI {
-    SI_1,
-    SI_2,
-}
-
-impl BlockTr for SI {
-    fn vectors(&self) -> Positions {
-        match self {
-            SI::SI_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(0,2),Vec2::new(0,3)],
-            SI::SI_2 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(3,0)],
+impl Shape {
+    fn random() -> Self {
+        match rand::thread_rng().gen_range(0..7) {
+            0 => Shape::I,
+            1 => Shape::O,
+            2 => Shape::T,
+            3 => Shape::S,
+            4 => Shape::Z,
+            5 => Shape::J,
+            6 => Shape::L,
+            _ => panic!("Invalid shape"),
         }
     }
 
-    fn rotate(&self) -> Block {
+    fn cells(&self) -> Vec<Pos> {
         match self {
-            SI::SI_1 => Block::SI(SI::SI_2),
-            SI::SI_2 => Block::SI(SI::SI_1),
+            Shape::I => vec![(-2,0),(-1,0),(0,0),(1,0)],
+            Shape::O => vec![(-1,-1),(0,-1),(0,0),(-1,0)],
+            Shape::T => vec![(-1,0),(0,-1),(0,0),(1,0)],
+            Shape::S => vec![(-1,0),(0,0),(0,-1),(1,-1)],
+            Shape::Z => vec![(0,0),(1,0),(0,-1),(-1,-1)],
+            Shape::J => vec![(-1,-1),(-1,0),(0,0),(1,0)],
+            Shape::L => vec![(-1,0),(0,0),(1,0),(1,-1)],
         }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,255,0)) // Green
     }
 }
 
-//  SO_1
-//  _ _ 
-// |_|_|
-// |_|_|
-#[derive(Debug, Clone, Copy)]
-pub enum SO {
-    SO_1,
-}
-
-impl BlockTr for SO {
-    fn vectors(&self) -> Positions {
-        match self {
-            SO::SO_1 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            SO::SO_1 => Block::SO(SO::SO_1),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(255,255,0)) // Orange
-    }
-}
-
-
-//  ST_1      ST_2     ST_3      ST_4   
-//    _       _                    _
-//  _|_|_    |_|_     _ _ _      _|_|
-// |_|_|_|   |_|_|   |_|_|_|    |_|_|
-//        ,  |_|   ,   |_|    ,   |_|
-#[derive(Debug, Clone, Copy)]
-pub enum ST {
-    ST_1,
-    ST_2,
-    ST_3,
-    ST_4,
-}
-
-impl BlockTr for ST {
-    fn vectors(&self) -> Positions {
-        match self {
-            ST::ST_1 => vec![Vec2::new(0,1),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(2,1)],
-            ST::ST_2 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
-            ST::ST_3 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(1,1)],
-            ST::ST_4 => vec![Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            ST::ST_1 => Block::ST(ST::ST_2),
-            ST::ST_2 => Block::ST(ST::ST_3),
-            ST::ST_3 => Block::ST(ST::ST_4),
-            ST::ST_4 => Block::ST(ST::ST_1),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,0,255)) // Blue
-    }
-}
-
-//   SS_1       SS_2
-//    _ _       _
-//  _|_|_|     |_|_ 
-// |_|_|       |_|_|  
-//         ,     |_|
-#[derive(Debug, Clone, Copy)]
-pub enum SS {
-    SS_1,
-    SS_2,
-}
-
-impl BlockTr for SS {
-    fn vectors(&self) -> Positions {
-        match self {
-            SS::SS_1 => vec![Vec2::new(1,0),Vec2::new(2,0),Vec2::new(0,1),Vec2::new(1,1)],
-            SS::SS_2 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(1,2)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            SS::SS_1 => Block::SS(SS::SS_2),
-            SS::SS_2 => Block::SS(SS::SS_1),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(255,0,255)) // Magenta
-    }
-}
-
-//   SZ_1       SZ_2
-//   _ _         _
-//  |_|_|_     _|_|
-//    |_|_|   |_|_|
-//          , |_|
-#[derive(Debug, Clone, Copy)]
-pub enum SZ {
-    SZ_1,
-    SZ_2,
-}
-
-impl BlockTr for SZ {
-    fn vectors(&self) -> Positions {
-        match self {
-            SZ::SZ_1 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(2,1)],
-            SZ::SZ_2 => vec![Vec2::new(1,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(0,2)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            SZ::SZ_1 => Block::SZ(SZ::SZ_2),
-            SZ::SZ_2 => Block::SZ(SZ::SZ_1),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,255,255)) // Cyan
-    }
-}
-
-//    SJ_1     SJ_2    SJ_3    SJ_4   
-//  _         _ _    _ _ _        _    
-// |_|_ _    |_|_|  |_|_|_|      |_|    
-// |_|_|_|   |_|        |_|     _|_|  
-//         , |_|   ,        ,  |_|_|    
-
-#[derive(Debug, Clone, Copy)]
-pub enum SJ {
-    SJ_1,
-    SJ_2,
-    SJ_3,
-    SJ_4,
-}
-
-impl BlockTr for SJ {
-    fn vectors(&self) -> Positions {
-        match self {
-            SJ::SJ_1 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(1,1),Vec2::new(2,1)],
-            SJ::SJ_2 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(0,1),Vec2::new(0,2)],
-            SJ::SJ_3 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0),Vec2::new(2,1)],
-            SJ::SJ_4 => vec![Vec2::new(1,0),Vec2::new(1,1),Vec2::new(1,2),Vec2::new(0,2)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            SJ::SJ_1 => Block::SJ(SJ::SJ_2),
-            SJ::SJ_2 => Block::SJ(SJ::SJ_3),
-            SJ::SJ_3 => Block::SJ(SJ::SJ_4),
-            SJ::SJ_4 => Block::SJ(SJ::SJ_1),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,128,128)) // Teal
-    }
-}
-
-
-//   SL_1      SL_2     SL_3    SL_4
-//      _      _ _    _ _ _      _ 
-//  _ _|_|    |_|_|  |_|_|_|    |_|
-// |_|_|_|      |_|  |_|        |_|_
-//          ,   |_| ,         , |_|_|
- 
-#[derive(Debug, Clone, Copy)]
-pub enum SL {
-    SL_1,
-    SL_2,
-    SL_3,
-    SL_4,
-}
-
-impl BlockTr for SL {
-    fn vectors(&self) -> Positions {
-        match self {
-            SL::SL_1 => vec![Vec2::new(0,1),Vec2::new(1,1),Vec2::new(2,1), Vec2::new(2,0)],
-            SL::SL_2 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(1,1),Vec2::new(1,2)],
-            SL::SL_3 => vec![Vec2::new(0,0),Vec2::new(1,0),Vec2::new(2,0), Vec2::new(0,1)],
-            SL::SL_4 => vec![Vec2::new(0,0),Vec2::new(0,1),Vec2::new(0,2),Vec2::new(1,2)],
-        }
-    }
-
-    fn rotate(&self) -> Block {
-        match self {
-            SL::SL_1 => Block::SL(SL::SL_4),
-            SL::SL_2 => Block::SL(SL::SL_1),
-            SL::SL_3 => Block::SL(SL::SL_2),
-            SL::SL_4 => Block::SL(SL::SL_3),
-        }
-    }
-
-    fn color(&self) -> ColorStyle {
-        ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(128,0,128)) // Purple
-    }
+#[derive(Clone, Debug)]
+enum Rotation {
+    R0,
+    R90,
+    R180,
+    R270,
 }

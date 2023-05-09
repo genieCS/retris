@@ -32,12 +32,12 @@ impl Queue {
     }
 
     fn draw_blocks(&self, printer: &Printer) {
-        let x_padding = 7;
+        let x_padding = 10;
         let mut y_padding = 7;
         for block in &self.blocks {
-            for vector in &block.vectors() {
+            for vector in &block.cells() {
                 printer.with_color(block.color(), |printer| {
-                    printer.print((2*vector.x + x_padding , y_padding + vector.y), "_|");
+                    printer.print((2*vector.0 + x_padding , y_padding + vector.1), "_|");
                 });
             }
             y_padding += 5;

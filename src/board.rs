@@ -34,7 +34,9 @@ impl Board {
         Self {
             current: Current::new(
                 Block::default(),
-                Vec2::new(width / 2, 0)
+                Vec2::new(width / 2, 0),
+                width,
+                height,
             ),
             colors: ColorGrid::new(
                 background_color,
@@ -49,7 +51,9 @@ impl Board {
         self.colors.clear();
         self.current = Current::new(
             Block::default(),
-            Vec2::new(self.colors.width() / 2, 0)
+            Vec2::new(self.colors.width() / 2, 0),
+            self.colors.width(),
+            self.colors.height(),
         );
     }
 
@@ -74,7 +78,9 @@ impl Board {
     pub fn insert_new_block(&mut self, block: Block) {
         self.current = Current::new(
             block,
-             Vec2::new(self.colors.width() / 2, 0)
+             Vec2::new(self.colors.width() / 2, 0),
+             self.colors.width(),
+            self.colors.height(),
             );
     }
 
