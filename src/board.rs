@@ -4,40 +4,19 @@ use cursive::{
     Printer, 
     theme::{Color, ColorStyle},
 };
-use crate::block::Block;
-use crate::current::Current;
+use crate::block::{ Block, BlockWithPos };
 use crate::color_grid::ColorGrid;
 use crate::lrd::{ LR, LRD };
 
 pub struct Board {
-    current: Current,
+    block: BlockWithPos,
     colors: ColorGrid,
-}
-
-
-
-impl Default for Board {
-    fn default() -> Self {
-        Self::new(
-            (
-                ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(0,0,0)),
-                ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(30,30,30)),
-            ),
-            ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0)),
-            10,
-            20)
-    }
 }
 
 impl Board {
     pub fn new(background_color: (ColorStyle, ColorStyle), warning_color: ColorStyle, width: usize, height: usize) -> Self {
         Self {
-            current: Current::new(
-                Block::default(),
-                Vec2::new(width / 2, 0),
-                width,
-                height,
-            ),
+            block: Self::insert_new_block(Block::default(), width, height),
             colors: ColorGrid::new(
                 background_color,
                 warning_color,
@@ -49,48 +28,120 @@ impl Board {
 
     pub fn renew(&mut self) {
         self.colors.clear();
-        self.current = Current::new(
-            Block::default(),
-            Vec2::new(self.colors.width() / 2, 0),
-            self.colors.width(),
-            self.colors.height(),
-        );
+        self.insert(Block::default());
     }
 
-    pub fn move_lrd(&mut self, lrd: LRD) -> (bool, bool) {
-        self.current.move_lrd(lrd, &self.colors)
+    pub fn insert(&mut self, block: Block) {
+        self.block = Board::insert_new_block(block, self.colors.width(), self.colors.height());
+    }
+
+    fn insert_new_block(block: Block, width: usize, height: usize) -> BlockWithPos {
+        Board::fit(block, Vec2::new(width / 2, 0), width, height).unwrap()
+    }
+
+    fn fit(block: Block, _pos: Vec2, width: usize, height: usize) -> Option<BlockWithPos> {
+        let mut pos = _pos;
+        for _ in 0..6 {
+            let mut possible = true;
+            for cell in block.cells() {
+                let x = pos.x as i32 + cell.0;
+                let y = pos.y as i32 + cell.1;
+                if x < 0 {
+                    pos.x += 1;
+                    possible = false;
+                    break;
+                } else if x >= width as i32 {
+                    pos.x -= 1;
+                    possible = false;
+                    break;
+                } else if y < 0 {
+                    pos.y += 1;
+                    possible = false;
+                    break;
+                } else if y >= height as i32{
+                    pos.y -= 1;
+                    possible = false;
+                    break;
+                }
+            }
+            if possible {
+                return Some(BlockWithPos::new(block,pos));
+            }
+        }
+        None
+    }
+
+    pub fn move_block_lrd(&self, block: &BlockWithPos, lrd: LRD) -> (Option<BlockWithPos>, bool) {
+        let (can_move, stop) = self.can_move(block, &lrd);
+        if !can_move {
+            return (None, stop)
+        }
+        let delta = lrd.delta();
+        let x = block.pos.x as i32 + delta.0;
+        let y = block.pos.y as i32 + delta.1;
+        let bwp = BlockWithPos::new(block.block.clone(), Vec2::new(x as usize, y as usize));
+        (Some(bwp), stop)
+    }
+
+    fn can_move(&self, block: &BlockWithPos, lrd: &LRD) -> (bool, bool) {
+        let delta = lrd.delta();
+        let mut stop = false;
+        let board_width = self.colors.width() as i32;
+        let board_height = self.colors.height() as i32;
+        for cell in block.cells() {
+            let next_x = cell.x as i32 + delta.0;
+            let next_y =  cell.y as i32 + delta.1;
+            if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || self.colors.is_occupied(next_x as usize, next_y as usize)
+            {
+                return (false, false);
+            }
+            if next_y + 1 == board_height || self.colors.is_occupied(next_x as usize, next_y as usize + 1)
+            {
+                stop = true;
+            }
+        }
+        (true, stop)
+    }
+
+    pub fn hint(&self) -> BlockWithPos {
+        let mut hint = self.block.clone();
+        let mut stopped = false;
+        while !stopped {
+            let (block, hit_bottom) = self.move_block_lrd(&hint, LRD::Down);
+            stopped = hit_bottom || block.is_none();
+            hint = block.unwrap_or(hint);
+        }
+        hint
     }
 
     pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
         let mut stopped = false;
         let mut hit_bottom = is_drop;
-        let mut moved;
+        let mut current: Option<BlockWithPos>;
         while !stopped {
-            (moved, hit_bottom)= self.move_lrd(LRD::Down);
-            if !moved {
-                return (true, true)
+            (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
+            match current {
+                Some(b) => self.block = b,
+                None => return (true, true),
             }
+
             stopped = hit_bottom || !is_drop;
         }
-        (false, hit_bottom && self.colors.merge_block(&self.current))
-    }
-
-    pub fn insert_new_block(&mut self, block: Block) {
-        self.current = Current::new(
-            block,
-             Vec2::new(self.colors.width() / 2, 0),
-             self.colors.width(),
-            self.colors.height(),
-            );
+        (false, hit_bottom && self.colors.merge_block(&self.block))
     }
 
     fn handle_lr(&mut self, lr: LR) -> EventResult {
-        self.move_lrd(lr.to_lrd());
+        let (block, _) = self.move_block_lrd(&self.block, lr.to_lrd());
+        if block.is_some() {
+            self.block = block.unwrap();
+        }
         EventResult::Consumed(None)
     }
 
     pub fn rotate(&mut self) -> EventResult {
-        self.current.rotate(&self.colors);
+        let next_block = self.block.block.rotate();
+        Board::fit(next_block, self.block.pos, self.colors.width(), self.colors.height())
+            .map(|b| self.block = b);
         EventResult::Consumed(None)
     }
 }
@@ -99,8 +150,8 @@ impl View for Board {
     fn draw(&self, printer: &Printer) {
         self.draw_background(printer);
         self.draw_dangerous(printer);
-        self.draw_hint(&self.current.hint(&self.colors), printer);
-        self.draw_block(&self.current, printer);
+        self.draw_hint(&self.hint(), printer);
+        self.draw_block(&self.block, printer);
     }
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
@@ -132,17 +183,17 @@ impl Board {
         }
     }
 
-    fn draw_block(&self, block: &Current, printer: &Printer) {
-        for cell in block {
+    fn draw_block(&self, block: &BlockWithPos, printer: &Printer) {
+        for cell in block.cells() {
                 printer.with_color(block.color(), |printer| {
                     printer.print((2*cell.x, cell.y), "  ");
                 });
         }
     }
 
-    fn draw_hint(&self, block: &Current, printer: &Printer) {
+    fn draw_hint(&self, block: &BlockWithPos, printer: &Printer) {
         let color = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(0,0,0));
-        for cell in block {
+        for cell in block.cells() {
                 printer.with_color(color, |printer| {
                     printer.print((2*cell.x, cell.y), "░░");
                 });

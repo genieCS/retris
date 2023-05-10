@@ -57,7 +57,7 @@ impl Tetris {
         }
         if merged {
             let block = self.queue.pop_and_spawn_new_block();
-            self.board.insert_new_block(block);
+            self.board.insert(block);
         }
         EventResult::Consumed(None)
     }
