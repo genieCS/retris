@@ -1,4 +1,5 @@
 use cursive::{
+    Vec2,
     theme::{BaseColor, Color, ColorStyle},
 };
 use rand::Rng;
@@ -7,19 +8,48 @@ type Pos = (i32, i32);
 
 
 #[derive(Clone, Debug)]
+pub struct BlockWithPos {
+    pub block: Block,
+    pub pos: Vec2,
+}
+
+impl BlockWithPos {
+    pub fn new(block: Block, pos: Vec2) -> Self {
+        Self {
+            block,
+            pos,
+        }
+    }
+
+    pub fn cells(&self) -> Vec<Vec2> {
+        self.block.cells().into_iter().map(|cell| {
+            let x = self.pos.x as i32 + cell.0;
+            let y = self.pos.y as i32 + cell.1;
+            Vec2::new(x as usize, y as usize)
+        }).collect::<Vec<Vec2>>()
+    }
+
+    pub fn color(&self) -> ColorStyle {
+        self.block.color()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Block {
     shape: Shape,
     rotation: Rotation,
 }
 
-
-impl Block {
-    pub fn default() -> Self {
+impl Default for Block {
+    fn default() -> Self {
         Self {
             shape: Shape::random(),
             rotation: Rotation::R0,
         }
     }
+}
+
+impl Block {
     pub fn cells(&self) -> Vec<Pos> {
         match self.rotation {
             Rotation::R0 => self.shape.cells(),
@@ -31,7 +61,7 @@ impl Block {
 
     pub fn rotate(&self) -> Block {
         match (&self.shape, &self.rotation) {
-            (Shape::O, _) => return self.clone(),
+            (Shape::O, _) => self.clone(),
             (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
             (_,Rotation::R90) => Block { shape: self.shape.clone(), rotation: Rotation::R180 },
             (_,Rotation::R180) => Block { shape: self.shape.clone(), rotation: Rotation::R270 },

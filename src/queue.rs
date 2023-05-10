@@ -10,6 +10,12 @@ pub struct Queue {
     pub blocks: VecDeque<Block>,
 }
 
+impl Default for Queue {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Queue {
     pub fn new() -> Self {
         let mut blocks = VecDeque::new();

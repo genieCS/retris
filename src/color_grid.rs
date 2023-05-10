@@ -2,7 +2,7 @@ use cursive::{
     theme::{ColorStyle},
 };
 use std::ops::Index;
-use crate::current::Current;
+use crate::block::BlockWithPos;
 
 pub struct ColorGrid {
     colors: Vec<Vec<ColorStyle>>,
@@ -63,15 +63,15 @@ impl ColorGrid {
         self.colors[y][x] != self.warning_color
     }
 
-    pub fn merge_block(&mut self, current: &Current) -> bool {
-        self.fill_board_with_block(current);
+    pub fn merge_block(&mut self, block: &BlockWithPos) -> bool {
+        self.fill_board_with_block(block);
         self.remove_rows_if_possible();
         true
     }
 
-    fn fill_board_with_block(&mut self, current: &Current) {
-        for cell in current {
-            self.colors[cell.y][cell.x] = current.color();
+    fn fill_board_with_block(&mut self, block: &BlockWithPos) {
+        for cell in block.cells() {
+            self.colors[cell.y][cell.x] = block.color();
         }
     }
 
