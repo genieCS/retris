@@ -23,6 +23,14 @@ impl Score {
         Self::default()
     }
 
+    pub fn add(&mut self, s: usize) {
+        self.score += s
+    }
+
+    pub fn is_gameover(&self) -> bool {
+        self.score >= self.perfect
+    }
+
     fn num2str(&self) -> Vec<String> {
         let mut score = self.score.to_string();
         if score.len() < 2 {

@@ -55,7 +55,9 @@ impl Tetris {
         if self.is_paused {
             return EventResult::Consumed(None);
         }
-        let (gameover, merged) = self.board.on_down(is_drop);
+        let (gameover, merged, score) = self.board.on_down(is_drop);
+        self.score.add(score);
+        let gameover = gameover || self.score.is_gameover();
         if gameover {
             self.is_paused = true;
             return EventResult::Consumed(Some(Callback::from_fn(move |s| {
