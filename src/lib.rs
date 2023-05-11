@@ -7,4 +7,5 @@ pub mod manual;
 pub mod numbers;
 pub mod score;
 pub mod tetris;
+pub mod timer;
 pub mod queue;

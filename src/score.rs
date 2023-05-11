@@ -32,11 +32,7 @@ impl Score {
     }
 
     fn num2str(&self) -> Vec<String> {
-        let mut score = self.score.to_string();
-        if score.len() < 2 {
-             score = format!("0{}", score);
-        }
-        numbers::display(&format!("{} {}", score, self.perfect), "/")
+        numbers::display(&format!("{} {}", numbers::padding(self.score, 2), self.perfect), "/", true)
     }
 }
 
@@ -49,6 +45,6 @@ impl View for Score {
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
         let lines = self.num2str();
-        cursive::Vec2::new(lines[0].len() + 3, lines.len())
+        cursive::Vec2::new(lines[0].len() + 3, lines.len() + 3)
     }
 }

@@ -1,6 +1,7 @@
 use crate::board::Board;
 use crate::manual::Manual;
 use crate::score::Score;
+use crate::timer::Timer;
 use crate::queue::Queue;
 use cursive::{
     event::{Callback, Event, EventResult, Key},
@@ -11,10 +12,12 @@ use cursive::{
 
 pub struct Tetris {
     score: Score,
+    timer: Timer,
     manual: Manual,
     board: Board,
     queue: Queue,
     score_size: Vec2,
+    timer_size: Vec2,
     manual_size: Vec2,
     board_size: Vec2,
     is_paused: bool,
@@ -34,17 +37,21 @@ impl Tetris {
         );
         let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
         let mut score = Score::new();
+        let mut timer = Timer::new();
         let mut manual = Manual::new();
         let mut board = Board::new(background_color, warning_color, 10, 20);
         let score_size = score.required_size(Vec2::new(0,0));
+        let timer_size = timer.required_size(Vec2::new(0,0));
         let manual_size = manual.required_size(Vec2::new(0,0));
         let board_size = board.required_size(Vec2::new(0,0));
         Tetris {
             score,
+            timer,
             manual,
             board,
             queue: Queue::new(),
             score_size,
+            timer_size,
             manual_size,
             board_size,
             is_paused: false,
@@ -59,7 +66,7 @@ impl Tetris {
         self.score.add(score);
         let gameover = gameover || self.score.is_gameover();
         if gameover {
-            self.is_paused = true;
+            self.toggle_pause();
             return EventResult::Consumed(Some(Callback::from_fn(move |s| {
                 s.add_layer(Dialog::info("Game Over!"));
             })));
@@ -79,8 +86,13 @@ impl Tetris {
     }
 
     fn stop_and_resume(&mut self) -> EventResult {
-        self.is_paused = !self.is_paused;
+        self.toggle_pause();
         EventResult::Consumed(None)
+    }
+
+    fn toggle_pause(&mut self) {
+        self.is_paused = !self.is_paused;
+        self.timer.toggle_pause();
     }
 
     fn pass_event_to_board(&mut self, event: Event) -> EventResult {
@@ -97,17 +109,20 @@ impl View for Tetris {
         let x_padding = 1;
         let y_padding = 1;
         let score_padding = Vec2::new(x_padding, y_padding);
-        let manual_padding = Vec2::new(x_padding, self.score_size.y);
+        let timer_padding = Vec2::new(x_padding, y_padding + self.score_size.y);
+        let manual_padding = Vec2::new(x_padding, y_padding + self.score_size.y + self.timer_size.y);
         let first_column_x_padding = std::cmp::max(self.score_size.x, self.manual_size.x);
         let board_padding = Vec2::new(x_padding + first_column_x_padding, y_padding);
         let queue_padding = Vec2::new(x_padding + first_column_x_padding + self.board_size.x, y_padding);
 
         let score_printer = printer.offset(score_padding);
+        let timer_printer = printer.offset(timer_padding);
         let manual_printer = printer.offset(manual_padding);
         let board_printer = printer.offset(board_padding);
         let queue_printer = printer.offset(queue_padding);
 
         self.score.draw(&score_printer);
+        self.timer.draw(&timer_printer);
         self.manual.draw(&manual_printer);
         self.board.draw(&board_printer);
         self.queue.draw(&queue_printer);
@@ -116,10 +131,11 @@ impl View for Tetris {
 
     fn required_size(&mut self, constraints: Vec2) -> Vec2 {
         let score_size = self.score.required_size(constraints);
+        let timer_size = self.timer.required_size(constraints);
         let manual_size = self.manual.required_size(constraints);
         let board_size = self.board.required_size(constraints);
         let queue_size = self.queue.required_size(constraints);
-        Vec2::new(std::cmp::max(manual_size.x, score_size.x) + board_size.x + queue_size.x + 10, board_size.y)
+        Vec2::new(std::cmp::max(std::cmp::max(manual_size.x, score_size.x), timer_size.x) + board_size.x + queue_size.x + 10, board_size.y)
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
