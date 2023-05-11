@@ -1,5 +1,6 @@
 use crate::board::Board;
 use crate::manual::Manual;
+use crate::score::Score;
 use crate::queue::Queue;
 use cursive::{
     event::{Callback, Event, EventResult, Key},
@@ -9,9 +10,11 @@ use cursive::{
 };
 
 pub struct Tetris {
+    score: Score,
     manual: Manual,
     board: Board,
     queue: Queue,
+    score_size: Vec2,
     manual_size: Vec2,
     board_size: Vec2,
     is_paused: bool,
@@ -30,14 +33,18 @@ impl Tetris {
             ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(30,30,30)),
         );
         let warning_color = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(200,200,0));
+        let mut score = Score::new();
         let mut manual = Manual::new();
         let mut board = Board::new(background_color, warning_color, 10, 20);
+        let score_size = score.required_size(Vec2::new(0,0));
         let manual_size = manual.required_size(Vec2::new(0,0));
         let board_size = board.required_size(Vec2::new(0,0));
         Tetris {
+            score,
             manual,
             board,
             queue: Queue::new(),
+            score_size,
             manual_size,
             board_size,
             is_paused: false,
@@ -87,24 +94,30 @@ impl View for Tetris {
     fn draw(&self, printer: &Printer) {
         let x_padding = 1;
         let y_padding = 1;
-        let manual_padding = Vec2::new(x_padding, y_padding);
-        let board_padding = Vec2::new(x_padding + self.manual_size.x, y_padding);
-        let queue_padding = Vec2::new(x_padding + self.manual_size.x + self.board_size.x, y_padding);
+        let score_padding = Vec2::new(x_padding, y_padding);
+        let manual_padding = Vec2::new(x_padding, self.score_size.y);
+        let first_column_x_padding = std::cmp::max(self.score_size.x, self.manual_size.x);
+        let board_padding = Vec2::new(x_padding + first_column_x_padding, y_padding);
+        let queue_padding = Vec2::new(x_padding + first_column_x_padding + self.board_size.x, y_padding);
 
+        let score_printer = printer.offset(score_padding);
         let manual_printer = printer.offset(manual_padding);
         let board_printer = printer.offset(board_padding);
         let queue_printer = printer.offset(queue_padding);
 
+        self.score.draw(&score_printer);
         self.manual.draw(&manual_printer);
         self.board.draw(&board_printer);
         self.queue.draw(&queue_printer);
+        self.score.draw(&printer.offset(Vec2::new(0, self.board_size.y + 2)));
     }
 
     fn required_size(&mut self, constraints: Vec2) -> Vec2 {
+        let score_size = self.score.required_size(constraints);
         let manual_size = self.manual.required_size(constraints);
         let board_size = self.board.required_size(constraints);
         let queue_size = self.queue.required_size(constraints);
-        Vec2::new(manual_size.x + board_size.x + queue_size.x + 10, board_size.y)
+        Vec2::new(std::cmp::max(manual_size.x, score_size.x) + board_size.x + queue_size.x + 10, board_size.y)
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {

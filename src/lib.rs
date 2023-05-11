@@ -4,5 +4,7 @@ pub mod game;
 pub mod color_grid;
 pub mod lrd;
 pub mod manual;
+pub mod numbers;
+pub mod score;
 pub mod tetris;
 pub mod queue;
