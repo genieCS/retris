@@ -1,12 +1,15 @@
 use cursive::{
     theme::{ColorStyle},
+    Vec2,
 };
 use std::ops::Index;
-use crate::block::BlockWithPos;
+use crate::block::{Block, BlockWithPos};
+use crate::lrd::{ LR, LRD };
 
 pub struct ColorGrid {
+    pub block: BlockWithPos,
     colors: Vec<Vec<ColorStyle>>,
-    pub background_color: (ColorStyle, ColorStyle),
+    background_color: (ColorStyle, ColorStyle),
     pub warning_color: ColorStyle,
 }
 
@@ -26,10 +29,123 @@ impl ColorGrid {
             colors.push(row);
         }
         Self {
+            block: Self::insert_new_block(Block::default(), width, height),
             colors,
             background_color,
             warning_color,
         }
+    }
+
+    pub fn insert(&mut self, block: Block) {
+        self.block = ColorGrid::insert_new_block(block, self.width(), self.height());
+    }
+
+    fn insert_new_block(block: Block, width: usize, height: usize) -> BlockWithPos {
+        ColorGrid::fit(block, Vec2::new(width / 2, 0), width, height).unwrap()
+    }
+
+    fn fit(block: Block, _pos: Vec2, width: usize, height: usize) -> Option<BlockWithPos> {
+        let mut pos = _pos;
+        for _ in 0..6 {
+            let mut possible = true;
+            for cell in block.cells() {
+                let x = pos.x as i32 + cell.0;
+                let y = pos.y as i32 + cell.1;
+                if x < 0 {
+                    pos.x += 1;
+                    possible = false;
+                    break;
+                } else if x >= width as i32 {
+                    pos.x -= 1;
+                    possible = false;
+                    break;
+                } else if y < 0 {
+                    pos.y += 1;
+                    possible = false;
+                    break;
+                } else if y >= height as i32{
+                    pos.y -= 1;
+                    possible = false;
+                    break;
+                }
+            }
+            if possible {
+                return Some(BlockWithPos::new(block, pos))
+            }
+        }
+        None
+    }
+
+    pub fn move_block_lrd(&self, block: &BlockWithPos, lrd: LRD) -> (Option<BlockWithPos>, bool) {
+        let (can_move, stop) = self.can_move(block, &lrd);
+        if !can_move {
+            return (None, stop)
+        }
+        let delta = lrd.delta();
+        let x = block.pos.x as i32 + delta.0;
+        let y = block.pos.y as i32 + delta.1;
+        let bwp = BlockWithPos::new(block.block.clone(), Vec2::new(x as usize, y as usize));
+        (Some(bwp), stop)
+    }
+
+    fn can_move(&self, block: &BlockWithPos, lrd: &LRD) -> (bool, bool) {
+        let delta = lrd.delta();
+        let mut stop = false;
+        let board_width = self.width() as i32;
+        let board_height = self.height() as i32;
+        for cell in block.cells() {
+            let next_x = cell.x as i32 + delta.0;
+            let next_y =  cell.y as i32 + delta.1;
+            if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || self.is_occupied(next_x as usize, next_y as usize)
+            {
+                return (false, false);
+            }
+            if next_y + 1 == board_height || self.is_occupied(next_x as usize, next_y as usize + 1)
+            {
+                stop = true;
+            }
+        }
+        (true, stop)
+    }
+
+    pub fn hint(&self) -> BlockWithPos {
+        let mut hint = self.block.clone();
+        let mut stopped = false;
+        while !stopped {
+            let (block, hit_bottom) = self.move_block_lrd(&hint, LRD::Down);
+            stopped = hit_bottom || block.is_none();
+            hint = block.unwrap_or(hint);
+        }
+        hint
+    }
+
+    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
+        let mut stopped = false;
+        let mut hit_bottom = is_drop;
+        let mut current: Option<BlockWithPos>;
+        while !stopped {
+            (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
+            match current {
+                Some(b) => self.block = b,
+                None => return (true, true),
+            }
+
+            stopped = hit_bottom || !is_drop;
+        }
+        (false, hit_bottom && self.merge_block())
+    }
+
+    pub fn handle_lr(&mut self, lr: LR) {
+        let (block, _) = self.move_block_lrd(&self.block, lr.to_lrd());
+        if block.is_some() {
+            self.block = block.unwrap();
+        }
+    }
+
+    pub fn rotate(&mut self) {
+        let next_block = self.block.block.rotate();
+        ColorGrid::fit(next_block, self.block.pos, self.width(), self.height())
+            .map(|b| self.block = b);
     }
 
     pub fn width(&self) -> usize {
@@ -49,12 +165,13 @@ impl ColorGrid {
         self.colors[y][x] = color;
     }
 
-    pub fn clear(&mut self) {
+    pub fn renew(&mut self) {
         for x in 0..self.width() {
             for y in 0..self.height() {
                 self.set_background(x, y);
             }
         }
+        self.insert(Block::default());
     }
 
     pub fn is_occupied(&self, x: usize, y: usize) -> bool {
@@ -63,15 +180,15 @@ impl ColorGrid {
         self.colors[y][x] != self.warning_color
     }
 
-    pub fn merge_block(&mut self, block: &BlockWithPos) -> bool {
-        self.fill_board_with_block(block);
+    pub fn merge_block(&mut self) -> bool {
+        self.fill_board_with_block();
         self.remove_rows_if_possible();
         true
     }
 
-    fn fill_board_with_block(&mut self, block: &BlockWithPos) {
-        for cell in block.cells() {
-            self.colors[cell.y][cell.x] = block.color();
+    fn fill_board_with_block(&mut self) {
+        for cell in self.block.cells() {
+            self.colors[cell.y][cell.x] = self.block.color();
         }
     }
 
