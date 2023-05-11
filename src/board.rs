@@ -32,7 +32,7 @@ impl Board {
         self.colors.move_block_lrd(block, lrd)
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
+    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool, usize) {
         self.colors.on_down(is_drop)
     }
 

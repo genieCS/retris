@@ -119,7 +119,7 @@ impl ColorGrid {
         hint
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
+    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool, usize) {
         let mut stopped = false;
         let mut hit_bottom = is_drop;
         let mut current: Option<BlockWithPos>;
@@ -127,12 +127,17 @@ impl ColorGrid {
             (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
             match current {
                 Some(b) => self.block = b,
-                None => return (true, true),
+                None => return (true, true, 0),
             }
 
             stopped = hit_bottom || !is_drop;
         }
-        (false, hit_bottom && self.merge_block())
+        let score = if hit_bottom {
+            self.merge_block()
+        } else {
+            0
+        };
+        (false, hit_bottom, score)
     }
 
     pub fn handle_lr(&mut self, lr: LR) {
@@ -180,10 +185,9 @@ impl ColorGrid {
         self.colors[y][x] != self.warning_color
     }
 
-    pub fn merge_block(&mut self) -> bool {
+    pub fn merge_block(&mut self) -> usize {
         self.fill_board_with_block();
-        self.remove_rows_if_possible();
-        true
+        self.remove_rows_if_possible()
     }
 
     fn fill_board_with_block(&mut self) {
@@ -192,7 +196,7 @@ impl ColorGrid {
         }
     }
 
-    fn remove_rows_if_possible(&mut self) {
+    fn remove_rows_if_possible(&mut self) -> usize {
         let mut rows_to_remove = Vec::new();
         for _y in 0..self.height() {
             let y = self.height() - _y - 1;
@@ -207,7 +211,9 @@ impl ColorGrid {
                 rows_to_remove.push(y);
             }
         }
+        let score = rows_to_remove.len();
         self.remove_rows(rows_to_remove);
+        score
     }
 
     fn remove_rows(&mut self, rows_to_remove: Vec<usize>) {
