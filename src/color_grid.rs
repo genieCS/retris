@@ -29,51 +29,11 @@ impl ColorGrid {
             colors.push(row);
         }
         Self {
-            block: Self::insert_new_block(Block::default(), width, height),
+            block: Self::insert_random(width),
             colors,
             background_color,
             warning_color,
         }
-    }
-
-    pub fn insert(&mut self, block: Block) {
-        self.block = ColorGrid::insert_new_block(block, self.width(), self.height());
-    }
-
-    fn insert_new_block(block: Block, width: usize, height: usize) -> BlockWithPos {
-        ColorGrid::fit(block, Vec2::new(width / 2, 0), width, height).unwrap()
-    }
-
-    fn fit(block: Block, _pos: Vec2, width: usize, height: usize) -> Option<BlockWithPos> {
-        let mut pos = _pos;
-        for _ in 0..6 {
-            let mut possible = true;
-            for cell in block.cells() {
-                let x = pos.x as i32 + cell.0;
-                let y = pos.y as i32 + cell.1;
-                if x < 0 {
-                    pos.x += 1;
-                    possible = false;
-                    break;
-                } else if x >= width as i32 {
-                    pos.x -= 1;
-                    possible = false;
-                    break;
-                } else if y < 0 {
-                    pos.y += 1;
-                    possible = false;
-                    break;
-                } else if y >= height as i32{
-                    pos.y -= 1;
-                    possible = false;
-                    break;
-                }
-            }
-            if possible {
-                return Some(BlockWithPos::new(block, pos))
-            }
-        }
-        None
     }
 
     pub fn move_block_lrd(&self, block: &BlockWithPos, lrd: LRD) -> (Option<BlockWithPos>, bool) {
@@ -148,9 +108,45 @@ impl ColorGrid {
     }
 
     pub fn rotate(&mut self) {
-        let next_block = self.block.block.rotate();
-        ColorGrid::fit(next_block, self.block.pos, self.width(), self.height())
-            .map(|b| self.block = b);
+        let axises: Vec<Vec2> = self.block.block.cells().into_iter()
+        .map(|(x,y)| (self.block.pos.x as i32 + x, self.block.pos.y as i32 + y))
+        .filter(|(x,y)| 0 <= *x && *x < self.width() as i32 && 0 <= *y && *y < self.height() as i32)
+        .map(|(x, y)| Vec2::new(x as usize, y as usize)).collect();
+        for axis in axises {
+            let mut pos = axis;
+            for _ in 0..10 {
+                let mut possible = true;
+                let next_block = self.block.block.rotate();
+                for cell in next_block.cells() {
+                    let x = pos.x as i32 + cell.0;
+                    let y = pos.y as i32 + cell.1;
+                    if x < 0 {
+                        pos.x += 1;
+                        possible = false;
+                        break;
+                    } else if x >= self.width() as i32 {
+                        pos.x -= 1;
+                        possible = false;
+                        break;
+                    } else if y < 0 {
+                        pos.y += 1;
+                        possible = false;
+                        break;
+                    } else if y >= self.height() as i32 {
+                        pos.y -= 1;
+                        possible = false;
+                        break;
+                    } else if self.is_occupied(x as usize, y as usize) {
+                        possible = false;
+                        break;
+                    }
+                }
+                if possible {
+                    self.block = BlockWithPos::new(next_block, pos);
+                    return
+                }
+            }
+        }
     }
 
     pub fn width(&self) -> usize {
@@ -176,7 +172,15 @@ impl ColorGrid {
                 self.set_background(x, y);
             }
         }
-        self.insert(Block::default());
+        self.block = ColorGrid::insert_random(self.width())
+    }
+
+    pub fn insert_random(width: usize) -> BlockWithPos {
+        BlockWithPos::new(Block::default(), Vec2::new(width / 2, 1))
+    }
+
+    pub fn insert(&mut self, block: Block) {
+        self.block = BlockWithPos::new(block, Vec2::new(self.width() / 2, 1));
     }
 
     pub fn is_occupied(&self, x: usize, y: usize) -> bool {
