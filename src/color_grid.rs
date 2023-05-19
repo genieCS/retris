@@ -225,7 +225,7 @@ impl ColorGrid {
         for row in rows_to_remove {
             while check_y > row {
                 if fill_y != check_y {
-                    self.colors[fill_y] = self.colors[check_y].clone();
+                    self.colors[fill_y] = self.background_row(check_y, fill_y);
                 }
                 fill_y -= 1;
                 check_y -= 1;
@@ -233,7 +233,7 @@ impl ColorGrid {
             check_y = row - 1;
         }
         while check_y > 0 {
-            self.colors[fill_y] = self.colors[check_y].clone();
+            self.colors[fill_y] = self.background_row(check_y, fill_y);
             fill_y -= 1;
             check_y -= 1;
         }
@@ -243,6 +243,23 @@ impl ColorGrid {
             }
             fill_y -= 1;
         }
+    }
+
+    fn background_row(&self, from: usize, to: usize) -> Vec<ColorStyle> {
+        let mut row = Vec::new();
+        for w in 0..self.width() {
+            if self.is_occupied(w, from) {
+                row.push(self.colors[from][w]);
+                continue
+            }
+            let color = if (w + to) % 2 == 0 {
+                self.background_color.0
+            } else {
+                self.background_color.1
+            };
+            row.push(color);        
+        }
+        row
     }
 }
 
