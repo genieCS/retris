@@ -31,20 +31,18 @@ impl Score {
         self.score >= self.perfect
     }
 
-    fn num2str(&self) -> Vec<String> {
-        numbers::display(&format!("{} {}", numbers::padding(self.score, 2), self.perfect), "/", true)
+    fn num2str(&self) -> String {
+        format!("Lines: {} / {}", numbers::padding(self.score, 2), self.perfect)
     }
 }
 
 impl View for Score {
     fn draw(&self, printer: &Printer) {
-        for (y, line) in self.num2str().iter().enumerate() {
-            printer.print((0, y), line);
-        }
+        printer.print((0, 0), &self.num2str());
     }
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
-        let lines = self.num2str();
-        cursive::Vec2::new(lines[0].len() + 3, lines.len() + 3)
+        let line = self.num2str();
+        cursive::Vec2::new(line.len() + 3, 2)
     }
 }
