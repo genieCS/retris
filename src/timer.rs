@@ -42,10 +42,12 @@ impl Timer {
         self.pause_start = now;
     }
 
-    pub fn time2str(&self) -> Vec<String> {
+    pub fn time2str(&self) -> String {
         let (mins, secs, mills) = self.elapsed();
-        self.str(mins, secs, mills)
-
+        let mins = numbers::padding(mins as usize, 2);
+        let secs = numbers::padding(secs as usize, 2);
+        let mills = numbers::padding(mills as usize, 3);
+        format!("Time {}:{}:{}", mins, secs, mills)
     }
 
     fn elapsed(&self) -> (u128, u128, u128) {
@@ -57,24 +59,15 @@ impl Timer {
         let mills = mills % 1000;
         (mins, secs, mills)
     }
-
-    fn str(&self, mins: u128, secs: u128, mills: u128) -> Vec<String> {
-        let mins = numbers::padding(mins as usize, 2);
-        let secs = numbers::padding(secs as usize, 2);
-        let mills = numbers::padding(mills as usize, 3);
-        numbers::display(&format!("{} {} {}", mins, secs, mills), ":", false)
-    }
 }
 
 impl View for Timer {
     fn draw(&self, printer: &Printer) {
-        for (y, line) in self.time2str().iter().enumerate() {
-            printer.print((0, y), line);
-        }    
+        printer.print((0, 0), &self.time2str());
     }
 
     fn required_size(&mut self, _: cursive::Vec2) -> cursive::Vec2 {
-        let lines = self.time2str();
-        cursive::Vec2::new(lines[0].len() + 3, lines.len())    
+        let line = self.time2str();
+        cursive::Vec2::new(line.len() + 3, 2)
     }
 }
