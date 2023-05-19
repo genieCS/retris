@@ -100,9 +100,11 @@ impl Board {
         }
         for j in 0..3 {
             for i in 0..width {
-                printer.with_color(self.colors.warning_color, |printer| {
-                    printer.print((2*i, j), "  ");
-                });
+                if !self.colors.is_occupied(i, j) {
+                    printer.with_color(self.colors.warning_color, |printer| {
+                        printer.print((2*i, j), "  ");
+                    });
+                }
             }
         }
     }
