@@ -104,7 +104,7 @@ impl ColorGrid {
         } 
     }
 
-    pub fn rotate(&mut self) {
+    pub fn rotate(&mut self, hit_bottom: bool) {
         let axises: Vec<Vec2> = self.block.block.cells().into_iter()
         .map(|(x,y)| (self.block.pos.x as i32 + x, self.block.pos.y as i32 + y))
         .filter(|(x,y)| 0 <= *x && *x < self.width() as i32 && 0 <= *y && *y < self.height() as i32)
@@ -140,6 +140,7 @@ impl ColorGrid {
                 }
                 if possible {
                     self.block = BlockWithPos::new(next_block, pos);
+                    self.on_down(hit_bottom);
                     return
                 }
             }

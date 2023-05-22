@@ -44,8 +44,8 @@ impl Board {
         self.colors.insert(block);
     }
 
-    fn rotate(&mut self) -> EventResult {
-        self.colors.rotate();
+    fn rotate(&mut self, hit_bottom: bool) -> EventResult {
+        self.colors.rotate(hit_bottom);
         EventResult::Consumed(None)
  
     }
@@ -59,7 +59,7 @@ impl Board {
         match event {
             Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom),
             Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom),
-            Event::Key(Key::Up) => self.rotate(),
+            Event::Key(Key::Up) => self.rotate(hit_bottom),
             _ => EventResult::Ignored,
         }
     }
