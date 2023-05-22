@@ -32,8 +32,12 @@ impl Board {
         self.colors.move_block_lrd(block, lrd)
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool, usize) {
+    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
         self.colors.on_down(is_drop)
+    }
+
+    pub fn merge_block(&mut self) -> usize {
+        self.colors.merge_block()
     }
 
     pub fn insert(&mut self, block: Block) {
@@ -46,9 +50,18 @@ impl Board {
  
     }
 
-    fn handle_lr(&mut self, lr: LR) -> EventResult {
-        self.colors.handle_lr(lr);
+    fn handle_lr(&mut self, lr: LR, hit_bottom: bool) -> EventResult {
+        self.colors.handle_lr(lr, hit_bottom);
         EventResult::Consumed(None)
+    }
+
+    pub fn handle_event(&mut self, event: Event, hit_bottom: bool) -> EventResult {
+        match event {
+            Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom),
+            Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom),
+            Event::Key(Key::Up) => self.rotate(),
+            _ => EventResult::Ignored,
+        }
     }
 
     fn draw_background(&self, printer: &Printer) {
@@ -125,11 +138,6 @@ impl View for Board {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
-        match event {
-            Event::Key(Key::Left)  => self.handle_lr(LR::Left),
-            Event::Key(Key::Right) => self.handle_lr(LR::Right),
-            Event::Key(Key::Up) => self.rotate(),
-            _ => EventResult::Ignored,
-        }
+        self.handle_event(event, false)
     }
 }
