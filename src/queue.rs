@@ -1,4 +1,4 @@
-use crate::block::Block;
+use crate::block::{ Block, Shape };
 use cursive:: {
     Printer,
     View,
@@ -8,6 +8,7 @@ use std::collections::VecDeque;
 
 pub struct Queue {
     pub blocks: VecDeque<Block>,
+    shapes: Vec<Shape>,
 }
 
 impl Default for Queue {
@@ -24,6 +25,7 @@ impl Queue {
         }
         Self {
             blocks,
+            shapes: Shape::all(),
         }
     }
 
@@ -33,7 +35,10 @@ impl Queue {
 
     pub fn pop_and_spawn_new_block(&mut self) -> Block {
         let block = self.blocks.pop_front().unwrap();
-        self.blocks.push_back(Block::default());
+        if self.shapes.is_empty() {
+            self.shapes = Shape::all();
+        }
+        self.blocks.push_back(Block::new(self.shapes.pop().unwrap()));
         block
     }
 
