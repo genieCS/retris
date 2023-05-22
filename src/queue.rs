@@ -57,7 +57,7 @@ impl Queue {
 
     fn draw_container(&self, printer: &Printer) {
         let x_padding = 4;
-        let y_padding = 6;
+        let y_padding = 4;
         let color_style = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(0,0,0));
         for j in 0..15 {
                 printer.with_color(color_style, |printer| {
