@@ -2,7 +2,8 @@ use cursive::{
     Vec2,
     theme::{BaseColor, Color, ColorStyle},
 };
-use rand::Rng;
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 
 type Pos = (i32, i32);
 
@@ -50,6 +51,13 @@ impl Default for Block {
 }
 
 impl Block {
+    pub fn new(shape: Shape) -> Self {
+        Self {
+            shape,
+            rotation: Rotation::R0,
+        }
+    }
+
     pub fn cells(&self) -> Vec<Pos> {
         match self.rotation {
             Rotation::R0 => self.shape.cells(),
@@ -88,7 +96,7 @@ impl Block {
 //  |_|_|_|_|    |_|_|     _|_|_      _|_|_|     |_|_|_     |_|_ _     _ _|_|  
 //               |_|_|    |_|_|_|    |_|_|         |_|_|    |_|_|_|   |_|_|_| 
 #[derive(Clone, Debug)]
-enum Shape {
+pub enum Shape {
     I,
     O,
     T,
@@ -100,16 +108,13 @@ enum Shape {
 
 impl Shape {
     fn random() -> Self {
-        match rand::thread_rng().gen_range(0..7) {
-            0 => Shape::I,
-            1 => Shape::O,
-            2 => Shape::T,
-            3 => Shape::S,
-            4 => Shape::Z,
-            5 => Shape::J,
-            6 => Shape::L,
-            _ => panic!("Invalid shape"),
-        }
+        Self::all().pop().unwrap()
+    }
+
+    pub fn all() -> Vec<Shape> {
+        let mut shapes = vec![Shape::I, Shape::O, Shape::T, Shape::S, Shape::Z, Shape::J, Shape::L];
+        shapes.shuffle(&mut thread_rng());
+        shapes
     }
 
     fn cells(&self) -> Vec<Pos> {
