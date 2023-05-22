@@ -140,7 +140,9 @@ impl ColorGrid {
                 }
                 if possible {
                     self.block = BlockWithPos::new(next_block, pos);
-                    self.on_down(hit_bottom);
+                    if hit_bottom {
+                        self.on_down(true);
+                    }
                     return
                 }
             }
