@@ -21,6 +21,8 @@ pub struct Tetris {
     manual_size: Vec2,
     board_size: Vec2,
     is_paused: bool,
+    hit_bottom: bool,
+    frame_idx: usize,
 }
 
 impl Default for Tetris {
@@ -55,6 +57,8 @@ impl Tetris {
             manual_size,
             board_size,
             is_paused: false,
+            hit_bottom: false,
+            frame_idx: 0,
         }
     }
 
@@ -62,8 +66,7 @@ impl Tetris {
         if self.is_paused {
             return EventResult::Consumed(None);
         }
-        let (gameover, merged, score) = self.board.on_down(is_drop);
-        self.score.add(score);
+        let (gameover, hit_bottom) = self.board.on_down(is_drop);
         let gameover = gameover || self.score.is_gameover();
         if gameover {
             self.toggle_pause();
@@ -71,10 +74,7 @@ impl Tetris {
                 s.add_layer(Dialog::info("Game Over!"));
             })));
         }
-        if merged {
-            let block = self.queue.pop_and_spawn_new_block();
-            self.board.insert(block);
-        }
+        self.hit_bottom = hit_bottom;
         EventResult::Consumed(None)
     }
 
@@ -95,12 +95,30 @@ impl Tetris {
         self.timer.toggle_pause();
     }
 
+    fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
+        if self.hit_bottom {
+            let score = self.board.merge_block();
+            self.score.add(score);
+            let block = self.queue.pop_and_spawn_new_block();
+            self.board.insert(block);
+            self.hit_bottom = false;
+        }
+        match event {
+            Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
+            Event::Char(' ') => self.on_down(true),
+            Event::Char('n') => self.new_game(),
+            Event::Char('s') => self.stop_and_resume(),
+            _ => EventResult::Ignored,
+        }
+    }
+
     fn pass_event_to_board(&mut self, event: Event) -> EventResult {
         if self.is_paused {
             EventResult::Consumed(None)
         } else {
-            self.board.on_event(event)
+            self.board.handle_event(event, self.hit_bottom)
         }
+
     }
 }
 
@@ -139,11 +157,19 @@ impl View for Tetris {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
+        if event == Event::Refresh {
+            self.frame_idx += 1;
+            if self.frame_idx == 10 {
+                self.frame_idx = 0;
+            } else {
+                return EventResult::Ignored;
+            }
+        } else {
+            self.frame_idx = 0;
+        }
+
         match event {
-            Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
-            Event::Char(' ') => self.on_down(true),
-            Event::Char('n') => self.new_game(),
-            Event::Char('s') => self.stop_and_resume(),
+            Event::Refresh | Event::Key(Key::Down) | Event::Char(' ') | Event::Char('n') | Event::Char('s') => self.handle_merge_and_pass(event),
             _ => self.pass_event_to_board(event),
         }
     }
