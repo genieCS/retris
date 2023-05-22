@@ -48,7 +48,7 @@ impl Queue {
         for block in &self.blocks {
             for vector in &block.cells() {
                 printer.with_color(block.color(), |printer| {
-                    printer.print((2*vector.0 + x_padding , y_padding + vector.1), "_|");
+                    printer.print((2*vector.0 + x_padding , y_padding + vector.1), "  ");
                 });
             }
             y_padding += 5;
@@ -58,7 +58,7 @@ impl Queue {
     fn draw_container(&self, printer: &Printer) {
         let x_padding = 4;
         let y_padding = 6;
-        let color_style = ColorStyle::new(Color::Rgb(0,0,0), Color::Rgb(255,255,255));
+        let color_style = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(0,0,0));
         for j in 0..15 {
                 printer.with_color(color_style, |printer| {
                     printer.print((x_padding, y_padding + j), "|          |");
