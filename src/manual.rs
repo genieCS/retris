@@ -23,10 +23,10 @@ impl View for Manual {
         let y_padding = 6;
             printer.print((0, y_padding), &format!(" {:18} ", "Manual"));
             printer.print((0 ,y_padding + 1), &format!(" {:18} ", "↑: rotate"));
-            printer.print((0, y_padding + 2), &format!(" {:18} ", "↓: down"));
+            printer.print((0, y_padding + 2), &format!(" {:18} ", "↓: speed up"));
             printer.print((0, y_padding + 3), &format!(" {:18} ", "←: left"));
             printer.print((0, y_padding + 4), &format!(" {:18} ", "→: right"));
-            printer.print((0, y_padding + 5), &format!(" {:18} ", "space: drop"));
+            printer.print((0, y_padding + 5), &format!(" {:18} ", "space: hard drop"));
             printer.print((0, y_padding + 6), &format!(" {:18} ", "s: stop and resume"));
             printer.print((0, y_padding + 7), &format!(" {:18} ", "n: new game"));
     }
