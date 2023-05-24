@@ -10,6 +10,8 @@ use cursive::{
     theme::{Color, ColorStyle},
 };
 
+const NORMAL_SPEED: usize = 30;
+const FAST_SPEED: usize = 4;
 pub struct Tetris {
     score: Score,
     timer: Timer,
@@ -23,6 +25,7 @@ pub struct Tetris {
     is_paused: bool,
     hit_bottom: bool,
     frame_idx: usize,
+    max_frame_idx: usize,
 }
 
 impl Default for Tetris {
@@ -59,6 +62,7 @@ impl Tetris {
             is_paused: false,
             hit_bottom: false,
             frame_idx: 0,
+            max_frame_idx: NORMAL_SPEED,
         }
     }
 
@@ -74,7 +78,11 @@ impl Tetris {
                 s.add_layer(Dialog::info("Game Over!"));
             })));
         }
-        self.hit_bottom = hit_bottom;
+        if hit_bottom && is_drop {
+            self.merge_block();
+        } else {
+            self.hit_bottom = hit_bottom;
+        }
         EventResult::Consumed(None)
     }
 
@@ -100,19 +108,31 @@ impl Tetris {
     fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
         let is_begin = self.hit_bottom;
         if self.hit_bottom {
-            let score = self.board.merge_block();
-            self.score.add(score);
-            let block = self.queue.pop_and_spawn_new_block();
-            self.board.insert(block);
-            self.hit_bottom = false;
+            self.merge_block();
         }
         match event {
-            Event::Refresh | Event::Key(Key::Down) => self.on_down(false, is_begin),
+            Event::Key(Key::Down) => self.speed_up(),
+            Event::Refresh => self.on_down(false, is_begin),
             Event::Char(' ') => self.on_down(true, is_begin),
             Event::Char('n') => self.new_game(),
             Event::Char('s') => self.stop_and_resume(),
             _ => EventResult::Ignored,
         }
+    }
+
+    fn merge_block(&mut self) {
+            let score = self.board.merge_block();
+            self.score.add(score);
+            let block = self.queue.pop_and_spawn_new_block();
+            self.board.insert(block);
+            self.hit_bottom = false;
+            self.max_frame_idx = NORMAL_SPEED;
+    }
+
+    fn speed_up(&mut self) -> EventResult {
+        self.max_frame_idx = FAST_SPEED;
+        self.frame_idx = 0;
+        EventResult::Consumed(None)
     }
 
     fn pass_event_to_board(&mut self, event: Event) -> EventResult {
@@ -161,7 +181,7 @@ impl View for Tetris {
     fn on_event(&mut self, event: Event) -> EventResult {
         if event == Event::Refresh {
             self.frame_idx += 1;
-            if self.frame_idx == 10 {
+            if self.frame_idx == self.max_frame_idx {
                 self.frame_idx = 0;
             } else {
                 return EventResult::Ignored;

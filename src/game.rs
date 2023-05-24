@@ -13,7 +13,7 @@ pub fn run() {
     siv.add_layer(tetris);
     siv.focus(&Selector::Name("tetris")).unwrap();
 
-    siv.set_fps(20);
+    siv.set_fps(1000);
 
     siv.run();
 }
