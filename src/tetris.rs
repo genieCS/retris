@@ -11,7 +11,7 @@ use cursive::{
 };
 
 const NORMAL_SPEED: usize = 30;
-const FAST_SPEED: usize = 5;
+const FAST_SPEED: usize = 4;
 pub struct Tetris {
     score: Score,
     timer: Timer,
@@ -78,7 +78,11 @@ impl Tetris {
                 s.add_layer(Dialog::info("Game Over!"));
             })));
         }
-        self.hit_bottom = hit_bottom;
+        if hit_bottom && is_drop {
+            self.merge_block();
+        } else {
+            self.hit_bottom = hit_bottom;
+        }
         EventResult::Consumed(None)
     }
 
@@ -104,12 +108,7 @@ impl Tetris {
     fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
         let is_begin = self.hit_bottom;
         if self.hit_bottom {
-            let score = self.board.merge_block();
-            self.score.add(score);
-            let block = self.queue.pop_and_spawn_new_block();
-            self.board.insert(block);
-            self.hit_bottom = false;
-            self.max_frame_idx = NORMAL_SPEED;
+            self.merge_block();
         }
         match event {
             Event::Key(Key::Down) => self.speed_up(),
@@ -119,6 +118,15 @@ impl Tetris {
             Event::Char('s') => self.stop_and_resume(),
             _ => EventResult::Ignored,
         }
+    }
+
+    fn merge_block(&mut self) {
+            let score = self.board.merge_block();
+            self.score.add(score);
+            let block = self.queue.pop_and_spawn_new_block();
+            self.board.insert(block);
+            self.hit_bottom = false;
+            self.max_frame_idx = NORMAL_SPEED;
     }
 
     fn speed_up(&mut self) -> EventResult {
