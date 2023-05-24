@@ -79,7 +79,7 @@ impl ColorGrid {
         hint
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
+    pub fn on_down(&mut self, is_drop: bool, is_begin: bool) -> (bool, bool) { // (gameover, hit_bottom)
         let mut stopped = false;
         let mut hit_bottom = is_drop;
         let mut current: Option<BlockWithPos>;
@@ -87,7 +87,7 @@ impl ColorGrid {
             (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
             match current {
                 Some(b) => self.block = b,
-                None => return (true, true),
+                None => return (is_begin, true),
             }
             stopped = hit_bottom || !is_drop;
         }
@@ -98,10 +98,10 @@ impl ColorGrid {
         let (block, _) = self.move_block_lrd(&self.block, lr.to_lrd());
         if block.is_some() {
             self.block = block.unwrap();
+            if hit_bottom {
+                self.on_down(true, false);
+            } 
         }
-        if hit_bottom {
-            self.on_down(true);
-        } 
     }
 
     pub fn rotate(&mut self, hit_bottom: bool) {
@@ -141,7 +141,7 @@ impl ColorGrid {
                 if possible {
                     self.block = BlockWithPos::new(next_block, pos);
                     if hit_bottom {
-                        self.on_down(true);
+                        self.on_down(true, false);
                     }
                     return
                 }

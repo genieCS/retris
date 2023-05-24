@@ -28,10 +28,11 @@ impl View for Manual {
             printer.print((0, y_padding + 4), &format!(" {:18} ", "→: right"));
             printer.print((0, y_padding + 5), &format!(" {:18} ", "space: drop"));
             printer.print((0, y_padding + 6), &format!(" {:18} ", "s: stop and resume"));
+            printer.print((0, y_padding + 7), &format!(" {:18} ", "n: new game"));
     }
 
     fn required_size(&mut self, _constraints: Vec2) -> Vec2 {
-        Vec2::new(20, 12)
+        Vec2::new(20, 13)
     }
 
     fn on_event(&mut self, _: Event) -> EventResult {

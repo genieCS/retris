@@ -32,8 +32,8 @@ impl Board {
         self.colors.move_block_lrd(block, lrd)
     }
 
-    pub fn on_down(&mut self, is_drop: bool) -> (bool, bool) {
-        self.colors.on_down(is_drop)
+    pub fn on_down(&mut self, is_drop: bool, is_begin: bool) -> (bool, bool) {
+        self.colors.on_down(is_drop, is_begin)
     }
 
     pub fn merge_block(&mut self) -> usize {

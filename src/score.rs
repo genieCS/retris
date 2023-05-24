@@ -31,6 +31,10 @@ impl Score {
         self.score >= self.perfect
     }
 
+    pub fn renew(&mut self) {
+        self.score = 0;
+    }
+
     fn num2str(&self) -> String {
         format!("Lines: {} / {}", numbers::padding(self.score, 2), self.perfect)
     }
@@ -43,6 +47,6 @@ impl View for Score {
 
     fn required_size(&mut self, _constraint: cursive::Vec2) -> cursive::Vec2 {
         let line = self.num2str();
-        cursive::Vec2::new(line.len() + 3, 2)
+        cursive::Vec2::new(line.len() + 3, 1)
     }
 }

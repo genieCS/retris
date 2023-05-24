@@ -27,6 +27,13 @@ impl Timer {
         }
     }
 
+    pub fn renew(&mut self) {
+        let now = Instant::now();
+        self.timer = now;
+        self.pause_start = now;
+        self.is_paused = false;
+    }
+
     pub fn toggle_pause(&mut self) {
         if self.is_paused {
             self.timer += Instant::now() - self.pause_start;
@@ -68,6 +75,6 @@ impl View for Timer {
 
     fn required_size(&mut self, _: cursive::Vec2) -> cursive::Vec2 {
         let line = self.time2str();
-        cursive::Vec2::new(line.len() + 3, 2)
+        cursive::Vec2::new(line.len() + 3, 1)
     }
 }

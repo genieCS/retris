@@ -62,11 +62,11 @@ impl Tetris {
         }
     }
 
-    fn on_down(&mut self, is_drop: bool) -> EventResult {
+    fn on_down(&mut self, is_drop: bool, is_begin: bool) -> EventResult {
         if self.is_paused {
             return EventResult::Consumed(None);
         }
-        let (gameover, hit_bottom) = self.board.on_down(is_drop);
+        let (gameover, hit_bottom) = self.board.on_down(is_drop, is_begin);
         let gameover = gameover || self.score.is_gameover();
         if gameover {
             self.toggle_pause();
@@ -79,8 +79,10 @@ impl Tetris {
     }
 
     fn new_game(&mut self) -> EventResult {
+        self.score.renew();
         self.board.renew();
         self.queue.renew();
+        self.timer.renew();
         self.is_paused = false;
         EventResult::Consumed(None)
     }
@@ -96,6 +98,7 @@ impl Tetris {
     }
 
     fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
+        let is_begin = self.hit_bottom;
         if self.hit_bottom {
             let score = self.board.merge_block();
             self.score.add(score);
@@ -104,8 +107,8 @@ impl Tetris {
             self.hit_bottom = false;
         }
         match event {
-            Event::Refresh | Event::Key(Key::Down) => self.on_down(false),
-            Event::Char(' ') => self.on_down(true),
+            Event::Refresh | Event::Key(Key::Down) => self.on_down(false, is_begin),
+            Event::Char(' ') => self.on_down(true, is_begin),
             Event::Char('n') => self.new_game(),
             Event::Char('s') => self.stop_and_resume(),
             _ => EventResult::Ignored,
@@ -127,9 +130,9 @@ impl View for Tetris {
         let x_padding = 1;
         let y_padding = 1;
         let score_padding = Vec2::new(x_padding, y_padding);
-        let timer_padding = Vec2::new(x_padding, y_padding + self.score_size.y);
-        let manual_padding = Vec2::new(x_padding, y_padding + self.score_size.y + self.timer_size.y);
-        let first_column_x_padding = std::cmp::max(self.score_size.x, self.manual_size.x);
+        let timer_padding = Vec2::new(x_padding, 2 * y_padding + self.score_size.y);
+        let manual_padding = Vec2::new(x_padding, 3 * y_padding + self.score_size.y + self.timer_size.y);
+        let first_column_x_padding = std::cmp::max(std::cmp::max(self.manual_size.x, self.score_size.x), self.timer_size.x);
         let board_padding = Vec2::new(x_padding + first_column_x_padding, y_padding);
         let queue_padding = Vec2::new(x_padding + first_column_x_padding + self.board_size.x, y_padding);
 
@@ -144,7 +147,6 @@ impl View for Tetris {
         self.manual.draw(&manual_printer);
         self.board.draw(&board_printer);
         self.queue.draw(&queue_printer);
-        self.score.draw(&printer.offset(Vec2::new(0, self.board_size.y + 2)));
     }
 
     fn required_size(&mut self, constraints: Vec2) -> Vec2 {
@@ -164,8 +166,6 @@ impl View for Tetris {
             } else {
                 return EventResult::Ignored;
             }
-        } else {
-            self.frame_idx = 0;
         }
 
         match event {
