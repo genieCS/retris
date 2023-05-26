@@ -10,7 +10,8 @@ use cursive::{
     theme::{Color, ColorStyle},
 };
 
-const NORMAL_SPEED: usize = 30;
+const SLOW_SPEED: usize = 30;
+const NORMAL_SPEED: usize = 10;
 const FAST_SPEED: usize = 4;
 pub struct Tetris {
     score: Score,
@@ -62,7 +63,7 @@ impl Tetris {
             is_paused: false,
             hit_bottom: false,
             frame_idx: 0,
-            max_frame_idx: NORMAL_SPEED,
+            max_frame_idx: SLOW_SPEED,
         }
     }
 
@@ -80,8 +81,9 @@ impl Tetris {
         }
         if hit_bottom && is_drop {
             self.merge_block();
-        } else {
+        } else if hit_bottom {
             self.hit_bottom = hit_bottom;
+            self.max_frame_idx = NORMAL_SPEED;
         }
         EventResult::Consumed(None)
     }
@@ -109,6 +111,7 @@ impl Tetris {
         let is_begin = self.hit_bottom;
         if self.hit_bottom {
             self.merge_block();
+            self.max_frame_idx = SLOW_SPEED;
         }
         match event {
             Event::Key(Key::Down) => self.speed_up(),
@@ -137,23 +140,25 @@ impl Tetris {
 
     fn pass_event_to_board(&mut self, event: Event) -> EventResult {
         if self.is_paused {
-            EventResult::Consumed(None)
-        } else {
-            self.board.handle_event(event, self.hit_bottom)
+            return EventResult::Consumed(None)
         }
+        if self.hit_bottom {
+            self.max_frame_idx = std::cmp::min(3 + self.max_frame_idx, 2 * NORMAL_SPEED);
+        }
+        self.board.handle_event(event, self.hit_bottom)
 
     }
 }
 
 impl View for Tetris {
     fn draw(&self, printer: &Printer) {
-        let x_padding = 1;
-        let y_padding = 1;
+        let x_padding = 4;
+        let y_padding = 4;
         let score_padding = Vec2::new(x_padding, y_padding);
-        let timer_padding = Vec2::new(x_padding, 2 * y_padding + self.score_size.y);
-        let manual_padding = Vec2::new(x_padding, 3 * y_padding + self.score_size.y + self.timer_size.y);
+        let timer_padding = Vec2::new(x_padding,  y_padding + 1 + self.score_size.y);
+        let manual_padding = Vec2::new(x_padding, y_padding + self.score_size.y + self.timer_size.y);
         let first_column_x_padding = std::cmp::max(std::cmp::max(self.manual_size.x, self.score_size.x), self.timer_size.x);
-        let board_padding = Vec2::new(x_padding + first_column_x_padding, y_padding);
+        let board_padding = Vec2::new(x_padding + first_column_x_padding + 2, y_padding);
         let queue_padding = Vec2::new(x_padding + first_column_x_padding + self.board_size.x, y_padding);
 
         let score_printer = printer.offset(score_padding);

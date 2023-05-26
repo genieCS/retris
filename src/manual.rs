@@ -27,7 +27,7 @@ impl View for Manual {
             printer.print((0, y_padding + 3), &format!(" {:18} ", "←: left"));
             printer.print((0, y_padding + 4), &format!(" {:18} ", "z: left most"));
             printer.print((0, y_padding + 5), &format!(" {:18} ", "→: right"));
-            printer.print((0, y_padding + 6), &format!(" {:18} ", "→: right most"));
+            printer.print((0, y_padding + 6), &format!(" {:18} ", "x: right most"));
             printer.print((0, y_padding + 7), &format!(" {:18} ", "space: hard drop"));
             printer.print((0, y_padding + 8), &format!(" {:18} ", "s: stop and resume"));
             printer.print((0, y_padding + 9), &format!(" {:18} ", "n: new game"));
