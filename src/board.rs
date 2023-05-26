@@ -50,16 +50,18 @@ impl Board {
  
     }
 
-    fn handle_lr(&mut self, lr: LR, hit_bottom: bool) -> EventResult {
-        self.colors.handle_lr(lr, hit_bottom);
+    fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) -> EventResult {
+        self.colors.handle_lr(lr, hit_bottom, is_hard);
         EventResult::Consumed(None)
     }
 
     pub fn handle_event(&mut self, event: Event, hit_bottom: bool) -> EventResult {
         match event {
-            Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom),
-            Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom),
+            Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom, false),
+            Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom, false),
             Event::Key(Key::Up) => self.rotate(hit_bottom),
+            Event::Char('z') => self.handle_lr(LR::Left, hit_bottom, true),
+            Event::Char('x') => self.handle_lr(LR::Right, hit_bottom, true),
             _ => EventResult::Ignored,
         }
     }
