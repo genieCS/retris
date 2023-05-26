@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub enum LR {
     Left,
     Right,
@@ -9,6 +10,7 @@ impl LR {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum LRD {
     LR(LR),
     Down,

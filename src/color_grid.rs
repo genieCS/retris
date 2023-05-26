@@ -50,6 +50,7 @@ impl ColorGrid {
 
     fn can_move(&self, block: &BlockWithPos, lrd: &LRD) -> (bool, bool) {
         let delta = lrd.delta();
+        let mut moved = true;
         let mut stop = false;
         let board_width = self.width() as i32;
         let board_height = self.height() as i32;
@@ -58,14 +59,16 @@ impl ColorGrid {
             let next_y =  cell.y as i32 + delta.1;
             if next_x < 0 || next_x >= board_width || next_y < 0 || next_y >= board_height || self.is_occupied(next_x as usize, next_y as usize)
             {
-                return (false, false);
+                moved = false;
+                stop = true;
+                break;
             }
             if next_y + 1 == board_height || self.is_occupied(next_x as usize, next_y as usize + 1)
             {
                 stop = true;
             }
         }
-        (true, stop)
+        (moved, stop)
     }
 
     pub fn hint(&self) -> BlockWithPos {
@@ -83,24 +86,30 @@ impl ColorGrid {
         let mut stopped = false;
         let mut hit_bottom = is_drop;
         let mut current: Option<BlockWithPos>;
+        let gameover = false;
         while !stopped {
-            (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
+           (current, hit_bottom)= self.move_block_lrd(&self.block, LRD::Down);
             match current {
                 Some(b) => self.block = b,
                 None => return (is_begin, true),
             }
             stopped = hit_bottom || !is_drop;
         }
-        (false, hit_bottom)
+        (gameover, hit_bottom)
     }
 
-    pub fn handle_lr(&mut self, lr: LR, hit_bottom: bool) {
-        let (block, _) = self.move_block_lrd(&self.block, lr.to_lrd());
-        if block.is_some() {
-            self.block = block.unwrap();
-            if hit_bottom {
-                self.on_down(true, false);
-            } 
+    pub fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) {
+        let lrd = lr.to_lrd();
+        let mut stopped = false;
+        while !stopped {
+            let (block, hit_wall) = self.move_block_lrd(&self.block, lrd);
+            if block.is_some() {
+                self.block = block.unwrap();
+            }
+            stopped = hit_wall || !is_hard;
+        }
+        if hit_bottom {
+            self.on_down(true, false);
         }
     }
 
