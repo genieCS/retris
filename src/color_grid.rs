@@ -98,12 +98,14 @@ impl ColorGrid {
         (gameover, hit_bottom)
     }
 
-    pub fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) {
+    pub fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) -> bool {
         let lrd = lr.to_lrd();
         let mut stopped = false;
+        let mut moved = false;
         while !stopped {
             let (block, hit_wall) = self.move_block_lrd(&self.block, lrd);
             if block.is_some() {
+                moved = true;
                 self.block = block.unwrap();
             }
             stopped = hit_wall || !is_hard;
@@ -111,9 +113,10 @@ impl ColorGrid {
         if hit_bottom {
             self.on_down(true, false);
         }
+        moved
     }
 
-    pub fn rotate(&mut self, hit_bottom: bool) {
+    pub fn rotate(&mut self, hit_bottom: bool) -> bool {
         let axises: Vec<Vec2> = self.block.block.cells().into_iter()
         .map(|(x,y)| (self.block.pos.x as i32 + x, self.block.pos.y as i32 + y))
         .filter(|(x,y)| 0 <= *x && *x < self.width() as i32 && 0 <= *y && *y < self.height() as i32)
@@ -152,10 +155,11 @@ impl ColorGrid {
                     if hit_bottom {
                         self.on_down(true, false);
                     }
-                    return
+                    return true
                 }
             }
         }
+        false
     }
 
     pub fn width(&self) -> usize {

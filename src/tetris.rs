@@ -148,11 +148,11 @@ impl Tetris {
         if self.is_paused {
             return EventResult::Consumed(None)
         }
-        if self.hit_bottom {
+        let moved = self.board.handle_event(event, self.hit_bottom);
+        if self.hit_bottom && moved {
             self.max_frame_idx = std::cmp::min(3 + self.max_frame_idx, 2 * NORMAL_SPEED);
         }
-        self.board.handle_event(event, self.hit_bottom)
-
+        EventResult::Consumed(None)
     }
 }
 
