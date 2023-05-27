@@ -112,7 +112,7 @@ impl Shape {
     }
 
     pub fn all() -> Vec<Shape> {
-        let mut shapes = vec![Shape::L, Shape::S, Shape::O, Shape::T, Shape::I, Shape::Z, Shape::J];
+        let mut shapes = vec![Shape::I, Shape::Z, Shape::J, Shape::T, Shape::O, Shape::S, Shape::L];
         // shapes.shuffle(&mut thread_rng());
         shapes
     }
