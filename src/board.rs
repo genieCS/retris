@@ -44,25 +44,23 @@ impl Board {
         self.colors.insert(block);
     }
 
-    fn rotate(&mut self, hit_bottom: bool) -> EventResult {
-        self.colors.rotate(hit_bottom);
-        EventResult::Consumed(None)
+    fn rotate(&mut self, hit_bottom: bool) -> bool {
+        self.colors.rotate(hit_bottom)
  
     }
 
-    fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) -> EventResult {
-        self.colors.handle_lr(lr, hit_bottom, is_hard);
-        EventResult::Consumed(None)
+    fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) -> bool {
+        self.colors.handle_lr(lr, hit_bottom, is_hard)
     }
 
-    pub fn handle_event(&mut self, event: Event, hit_bottom: bool) -> EventResult {
+    pub fn handle_event(&mut self, event: Event, hit_bottom: bool) -> bool {
         match event {
             Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom, false),
             Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom, false),
             Event::Key(Key::Up) => self.rotate(hit_bottom),
             Event::Char('z') => self.handle_lr(LR::Left, hit_bottom, true),
             Event::Char('x') => self.handle_lr(LR::Right, hit_bottom, true),
-            _ => EventResult::Ignored,
+            _ => false,
         }
     }
 
@@ -140,6 +138,7 @@ impl View for Board {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
-        self.handle_event(event, false)
+        self.handle_event(event, false);
+        EventResult::Consumed(None)
     }
 }
