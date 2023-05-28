@@ -116,7 +116,7 @@ impl ColorGrid {
         moved
     }
 
-    pub fn rotate(&mut self, hit_bottom: bool) -> bool {
+    pub fn rotate(&mut self, hit_bottom: bool, clockwise: bool) -> bool {
         let axises: Vec<Vec2> = self.block.block.cells().into_iter()
         .map(|(x,y)| (self.block.pos.x as i32 + x, self.block.pos.y as i32 + y))
         .filter(|(x,y)| 0 <= *x && *x < self.width() as i32 && 0 <= *y && *y < self.height() as i32)
@@ -125,7 +125,7 @@ impl ColorGrid {
             let mut pos = axis;
             for _ in 0..10 {
                 let mut possible = true;
-                let next_block = self.block.block.rotate();
+                let next_block = self.block.block.rotate(clockwise);
                 for cell in next_block.cells() {
                     let x = pos.x as i32 + cell.0;
                     let y = pos.y as i32 + cell.1;
