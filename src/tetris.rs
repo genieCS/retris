@@ -123,7 +123,7 @@ impl Tetris {
             Event::Refresh => self.on_down(false, is_begin),
             Event::Char(' ') => self.on_down(true, is_begin),
             Event::Char('n') => self.new_game(),
-            Event::Char('s') => self.stop_and_resume(),
+            Event::Char('m') => self.stop_and_resume(),
             _ => EventResult::Ignored,
         }
     }
@@ -200,7 +200,7 @@ impl View for Tetris {
         }
 
         match event {
-            Event::Refresh | Event::Key(Key::Down) | Event::Char(' ') | Event::Char('n') | Event::Char('s') => self.handle_merge_and_pass(event),
+            Event::Refresh | Event::Key(Key::Down) | Event::Char(' ') | Event::Char('n') | Event::Char('m') => self.handle_merge_and_pass(event),
             _ => self.pass_event_to_board(event),
         }
     }

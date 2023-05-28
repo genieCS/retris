@@ -67,7 +67,16 @@ impl Block {
         }
     }
 
-    pub fn rotate(&self) -> Block {
+    pub fn rotate(&self, clockwise: bool) -> Block {
+        let count = if clockwise { 1 } else { 3 };
+        let mut block = self.clone();
+        for _ in 0..count {
+            block = block.rotate_clockwise_once();
+        }
+        block
+    }
+
+    fn rotate_clockwise_once(&self) -> Block {
         match (&self.shape, &self.rotation) {
             (Shape::O, _) => self.clone(),
             (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
