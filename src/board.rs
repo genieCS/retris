@@ -57,10 +57,10 @@ impl Board {
         match event {
             Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom, false),
             Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom, false),
-            Event::Key(Key::Up) | Event::Char('d') => self.rotate(hit_bottom, true),
-            Event::Char('s') => self.rotate(hit_bottom, false),
-            Event::Char('z') => self.handle_lr(LR::Left, hit_bottom, true),
-            Event::Char('x') => self.handle_lr(LR::Right, hit_bottom, true),
+            Event::Key(Key::Up) | Event::Char('e') => self.rotate(hit_bottom, true),
+            Event::Char('w') => self.rotate(hit_bottom, false),
+            Event::Char('a') => self.handle_lr(LR::Left, hit_bottom, true),
+            Event::Char('d') => self.handle_lr(LR::Right, hit_bottom, true),
             _ => false,
         }
     }
