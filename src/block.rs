@@ -68,21 +68,30 @@ impl Block {
     }
 
     pub fn rotate(&self, clockwise: bool) -> Block {
-        let count = if clockwise { 1 } else { 3 };
-        let mut block = self.clone();
-        for _ in 0..count {
-            block = block.rotate_clockwise_once();
+        if clockwise {
+            self.rotate_clockwise()
+        } else {
+            self.rotate_counter_clockwise()
         }
-        block
     }
 
-    fn rotate_clockwise_once(&self) -> Block {
+    fn rotate_clockwise(&self) -> Block {
         match (&self.shape, &self.rotation) {
             (Shape::O, _) => self.clone(),
             (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
             (_,Rotation::R90) => Block { shape: self.shape.clone(), rotation: Rotation::R180 },
             (_,Rotation::R180) => Block { shape: self.shape.clone(), rotation: Rotation::R270 },
             (_,Rotation::R270) => Block { shape: self.shape.clone(), rotation: Rotation::R0 },
+        }
+    }
+
+    fn rotate_counter_clockwise(&self) -> Block {
+        match (&self.shape, &self.rotation) {
+            (Shape::O, _) => self.clone(),
+            (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R270 },
+            (_,Rotation::R90) => Block { shape: self.shape.clone(), rotation: Rotation::R0 },
+            (_,Rotation::R180) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
+            (_,Rotation::R270) => Block { shape: self.shape.clone(), rotation: Rotation::R180 },
         }
     }
 
