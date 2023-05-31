@@ -1,5 +1,6 @@
 use crate::board::Board;
 use crate::manual::Manual;
+use crate::pause::Pause;
 use crate::score::Score;
 use crate::timer::Timer;
 use crate::queue::Queue;
@@ -105,7 +106,13 @@ impl Tetris {
 
     fn stop_and_resume(&mut self) -> EventResult {
         self.toggle_pause();
-        EventResult::Consumed(None)
+        if self.is_paused {
+            EventResult::Consumed(Some(Callback::from_fn(move |s| {
+                s.add_layer(Pause::new());
+            })))
+        } else {
+            EventResult::Consumed(None)
+        }
     }
 
     fn toggle_pause(&mut self) {

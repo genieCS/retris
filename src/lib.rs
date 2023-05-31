@@ -5,6 +5,7 @@ pub mod color_grid;
 pub mod lrd;
 pub mod manual;
 pub mod numbers;
+pub mod pause;
 pub mod score;
 pub mod tetris;
 pub mod timer;
