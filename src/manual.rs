@@ -24,14 +24,15 @@ impl View for Manual {
             printer.print((0, y_padding), &format!(" {:18} ", "Manual"));
             printer.print((0 ,y_padding + 1), &format!(" {:18} ", "↑,e: rotate clockwise"));
             printer.print((0 ,y_padding + 2), &format!(" {:18} ", "w: rotate counterclockwise"));
-            printer.print((0, y_padding + 3), &format!(" {:18} ", "↓: speed up"));
-            printer.print((0, y_padding + 4), &format!(" {:18} ", "←: left"));
-            printer.print((0, y_padding + 5), &format!(" {:18} ", "a: left most"));
-            printer.print((0, y_padding + 6), &format!(" {:18} ", "→: right"));
-            printer.print((0, y_padding + 7), &format!(" {:18} ", "d: right most"));
-            printer.print((0, y_padding + 8), &format!(" {:18} ", "space: hard drop"));
-            printer.print((0, y_padding + 9), &format!(" {:18} ", "m: stop and resume"));
-            printer.print((0, y_padding + 10), &format!(" {:18} ", "n: new game"));
+            printer.print((0 ,y_padding + 3), &format!(" {:18} ", "s: rotate 180 degrees"));
+            printer.print((0, y_padding + 4), &format!(" {:18} ", "↓: speed up"));
+            printer.print((0, y_padding + 5), &format!(" {:18} ", "←: left"));
+            printer.print((0, y_padding + 6), &format!(" {:18} ", "a: left most"));
+            printer.print((0, y_padding + 7), &format!(" {:18} ", "→: right"));
+            printer.print((0, y_padding + 8), &format!(" {:18} ", "d: right most"));
+            printer.print((0, y_padding + 9), &format!(" {:18} ", "space: hard drop"));
+            printer.print((0, y_padding + 10), &format!(" {:18} ", "m: stop and resume"));
+            printer.print((0, y_padding + 11), &format!(" {:18} ", "n: new game"));
     }
 
     fn required_size(&mut self, _constraints: Vec2) -> Vec2 {
