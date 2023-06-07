@@ -28,6 +28,7 @@ pub struct Tetris {
     hit_bottom: bool,
     frame_idx: usize,
     max_frame_idx: usize,
+    gameover: bool,
 }
 
 impl Default for Tetris {
@@ -65,6 +66,7 @@ impl Tetris {
             hit_bottom: false,
             frame_idx: 0,
             max_frame_idx: SLOW_SPEED,
+            gameover: false,
         }
     }
 
@@ -75,6 +77,7 @@ impl Tetris {
         let (gameover, hit_bottom) = self.board.on_down(is_drop, is_begin);
         let gameover = gameover || self.score.is_gameover();
         if gameover {
+            self.gameover = true;
             self.toggle_pause();
             return EventResult::Consumed(Some(Callback::from_fn(move |s| {
                 s.add_layer(Dialog::info("Game Over!"));
@@ -101,6 +104,7 @@ impl Tetris {
         self.hit_bottom = false;
         self.frame_idx = 0;
         self.max_frame_idx = SLOW_SPEED;
+        self.gameover = false;
         EventResult::Consumed(None)
     }
 
@@ -121,6 +125,9 @@ impl Tetris {
     }
 
     fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
+        if self.gameover && event != Event::Char('n') {
+            return EventResult::Consumed(None);
+        }
         let is_begin = self.hit_bottom;
         if self.hit_bottom {
             self.merge_block();
@@ -152,7 +159,7 @@ impl Tetris {
     }
 
     fn pass_event_to_board(&mut self, event: Event) -> EventResult {
-        if self.is_paused {
+        if self.is_paused || self.gameover {
             return EventResult::Consumed(None)
         }
         let moved = self.board.handle_event(event, self.hit_bottom);
