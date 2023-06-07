@@ -1,9 +1,12 @@
 [package]
-name = "tetris-rs"
+name = "retris"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hyejin Lee <genie4cs@gmail.com>"]
 repository = "https://github.com/genieCS/tetris-rs"
+description = "This is a Rust implementation of tetris using the Cursive library"
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 cursive = "0.20"
