@@ -1,4 +1,4 @@
-use tetris_rs::game::run;
+use retris::game::run;
 
 fn main() {
     run();
