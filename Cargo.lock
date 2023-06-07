@@ -382,6 +382,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "retris"
+version = "0.1.0"
+dependencies = [
+ "cursive",
+ "rand",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -431,14 +439,6 @@ checksum = "1e4129646ca0ed8f45d09b929036bafad5377103edd06e50bf574b353d2b08d9"
 dependencies = [
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "tetris-rs"
-version = "0.1.0"
-dependencies = [
- "cursive",
- "rand",
 ]
 
 [[package]]
