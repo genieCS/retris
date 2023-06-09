@@ -1,13 +1,32 @@
 [package]
 name = "retris"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Hyejin Lee <genie4cs@gmail.com>"]
 repository = "https://github.com/genieCS/tetris-rs"
 description = "This is a Rust implementation of tetris using the Cursive library"
 license = "MIT"
 readme = "README.md"
+keywords = ["tui", "cursive", "tetris"]
+
+[features]
+default = ["crossterm-backend"]
+ncurses-backend = ["cursive/ncurses-backend"]
+pancurses-backend = ["cursive/pancurses-backend"]
+termion-backend = ["cursive/termion-backend"]
+crossterm-backend = ["cursive/crossterm-backend"]
+blt-backend = ["cursive/blt-backend"]
 
 [dependencies]
-cursive = "0.20"
 rand = "0.8.4"
+
+[dependencies.cursive]
+version = "0.20"
+default-features = false
+
+[dependencies.cursive_buffered_backend]
+# git = "https://github.com/gyscos/cursive_buffered_backend"
+version = "0.6.0"
+
+[dependencies.crossterm]
+version = "0.26.1"
