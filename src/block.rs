@@ -95,6 +95,16 @@ impl Block {
         }
     }
 
+    pub fn flip_turn(&self) -> Block {
+        match (&self.shape, &self.rotation) {
+            (Shape::O, _) => self.clone(),
+            (_,Rotation::R0) => Block { shape: self.shape.clone(), rotation: Rotation::R180 },
+            (_,Rotation::R90) => Block { shape: self.shape.clone(), rotation: Rotation::R270 },
+            (_,Rotation::R180) => Block { shape: self.shape.clone(), rotation: Rotation::R0 },
+            (_,Rotation::R270) => Block { shape: self.shape.clone(), rotation: Rotation::R90 },
+        }
+    }
+
     pub fn color(&self) -> ColorStyle {
         match self.shape {
             Shape::I => ColorStyle::new(Color::Dark(BaseColor::Blue), Color::Dark(BaseColor::Blue)),

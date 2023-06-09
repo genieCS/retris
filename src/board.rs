@@ -46,7 +46,10 @@ impl Board {
 
     fn rotate(&mut self, hit_bottom: bool, clockwise: bool) -> bool {
         self.colors.rotate(hit_bottom, clockwise)
- 
+    }
+
+    fn flip_turn(&mut self, hit_bottom: bool) -> bool {
+        self.colors.flip_turn(hit_bottom)
     }
 
     fn handle_lr(&mut self, lr: LR, hit_bottom: bool, is_hard: bool) -> bool {
@@ -58,7 +61,7 @@ impl Board {
             Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom, false),
             Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom, false),
             Event::Key(Key::Up) | Event::Char('e') => self.rotate(hit_bottom, true),
-            Event::Char('s') => self.rotate(hit_bottom, true) && self.rotate(hit_bottom, true),
+            Event::Char('s') => self.flip_turn(hit_bottom),
             Event::Char('w') => self.rotate(hit_bottom, false),
             Event::Char('a') => self.handle_lr(LR::Left, hit_bottom, true),
             Event::Char('d') => self.handle_lr(LR::Right, hit_bottom, true),

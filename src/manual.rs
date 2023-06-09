@@ -24,7 +24,7 @@ impl View for Manual {
             printer.print((0, y_padding), &format!(" {:18} ", "Manual"));
             printer.print((0 ,y_padding + 1), &format!(" {:18} ", "↑,e: rotate clockwise"));
             printer.print((0 ,y_padding + 2), &format!(" {:18} ", "w: rotate counterclockwise"));
-            printer.print((0 ,y_padding + 3), &format!(" {:18} ", "s: rotate 180 degrees"));
+            printer.print((0 ,y_padding + 3), &format!(" {:18} ", "s: flip turn"));
             printer.print((0, y_padding + 4), &format!(" {:18} ", "↓: speed up"));
             printer.print((0, y_padding + 5), &format!(" {:18} ", "←: left"));
             printer.print((0, y_padding + 6), &format!(" {:18} ", "a: left most"));
