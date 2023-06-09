@@ -1,6 +1,10 @@
 # Retris
 This is a simple implementation of the classic Tetris game in Rust using [Cursive](https://github.com/gyscos/cursive) library.
 
+
+https://github.com/genieCS/retris/assets/35099832/010d9acb-c2f3-4fb2-aee5-656bc8d42225
+
+
 # Features
 This is a Tetris game implementation with additional keyboard shortcuts for easier block manipulation. In this game, you can move the blocks to the leftmost or rightmost position using the added shortcuts, and rotate them in the opposite direction. This makes it easier to play the game with fewer keyboard inputs.
 
