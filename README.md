@@ -6,7 +6,7 @@ https://github.com/genieCS/retris/assets/35099832/010d9acb-c2f3-4fb2-aee5-656bc8
 
 
 # Features
-This is a Tetris game implementation with additional keyboard shortcuts for easier block manipulation. In this game, you can move the blocks to the leftmost or rightmost position using the added shortcuts, and rotate them in the opposite direction. This makes it easier to play the game with fewer keyboard inputs.
+This is a Tetris game implementation with additional keyboard shortcuts for easier block manipulation. In this game, you can move the blocks to the leftmost or rightmost position using the added shortcuts, and rotate them in the opposite direction and flipturn which is 180 degree rotation. This makes it easier to play the game with fewer keyboard inputs.
 
 # Installation
 To install and run the game, you'll need to have Rust and Cargo installed on your system. Once you have Rust and Cargo installed, you can clone the repository and run the game using the following commands:
