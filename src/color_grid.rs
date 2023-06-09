@@ -13,6 +13,14 @@ pub struct ColorGrid {
     pub warning_color: ColorStyle,
 }
 
+#[derive(Clone, Copy)]
+enum FlipRotate {
+    FlipTurn,
+    Rotate {
+        clockwise: bool,
+    }
+}
+
 impl ColorGrid {
     pub fn new(background_color: (ColorStyle, ColorStyle), warning_color: ColorStyle, width: usize, height: usize) -> Self {
         let mut colors = Vec::with_capacity(height);
@@ -116,7 +124,15 @@ impl ColorGrid {
         moved
     }
 
+    pub fn flip_turn(&mut self, hit_bottom: bool) -> bool {
+        self.flip_rotate(hit_bottom, FlipRotate::FlipTurn)
+    }
+
     pub fn rotate(&mut self, hit_bottom: bool, clockwise: bool) -> bool {
+        self.flip_rotate(hit_bottom, FlipRotate::Rotate { clockwise })
+    }
+
+    fn flip_rotate(&mut self, hit_bottom: bool, flip_rotate: FlipRotate) -> bool {
         let axises: Vec<Vec2> = self.block.block.cells().into_iter()
         .map(|(x,y)| (self.block.pos.x as i32 + x, self.block.pos.y as i32 + y))
         .filter(|(x,y)| 0 <= *x && *x < self.width() as i32 && 0 <= *y && *y < self.height() as i32)
@@ -125,7 +141,11 @@ impl ColorGrid {
             let mut pos = axis;
             for _ in 0..10 {
                 let mut possible = true;
-                let next_block = self.block.block.rotate(clockwise);
+                let next_block = match flip_rotate {
+                    FlipRotate::FlipTurn => self.block.block.flip_turn(),
+                    FlipRotate::Rotate { clockwise } => self.block.block.rotate(clockwise),
+                };
+
                 for cell in next_block.cells() {
                     let x = pos.x as i32 + cell.0;
                     let y = pos.y as i32 + cell.1;
