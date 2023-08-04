@@ -11,8 +11,16 @@ use cursive::{
     theme::{Color, ColorStyle},
 };
 
+#[cfg(not(feature = "wasm-backend"))]
 const SLOW_SPEED: usize = 30;
+#[cfg(feature = "wasm-backend")]
+const SLOW_SPEED: usize = 10;
+
+#[cfg(not(feature = "wasm-backend"))]
 const NORMAL_SPEED: usize = 10;
+#[cfg(feature = "wasm-backend")]
+const NORMAL_SPEED: usize = 5;
+
 const FAST_SPEED: usize = 1;
 pub struct Tetris {
     score: Score,
@@ -125,7 +133,7 @@ impl Tetris {
     }
 
     fn handle_merge_and_pass(&mut self, event: Event) -> EventResult {
-        if self.gameover && event != Event::Char('n') {
+        if self.gameover && event != Event::Char('n') && event != Event::Char('N') {
             return EventResult::Consumed(None);
         }
         let is_begin = self.hit_bottom;
@@ -136,8 +144,8 @@ impl Tetris {
             Event::Key(Key::Down) => self.speed_up(),
             Event::Refresh => self.on_down(false, is_begin),
             Event::Char(' ') => self.on_down(true, is_begin),
-            Event::Char('n') => self.new_game(),
-            Event::Char('m') => self.stop_and_resume(),
+            Event::Char('n') | Event::Char('N') => self.new_game(),
+            Event::Char('m') | Event::Char('M') => self.stop_and_resume(),
             _ => EventResult::Ignored,
         }
     }
@@ -214,7 +222,7 @@ impl View for Tetris {
         }
 
         match event {
-            Event::Refresh | Event::Key(Key::Down) | Event::Char(' ') | Event::Char('n') | Event::Char('m') => self.handle_merge_and_pass(event),
+            Event::Refresh | Event::Key(Key::Down) | Event::Char(' ') | Event::Char('n') | Event::Char('N') | Event::Char('m') | Event::Char('M') => self.handle_merge_and_pass(event),
             _ => self.pass_event_to_board(event),
         }
     }

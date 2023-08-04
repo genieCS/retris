@@ -1,6 +1,6 @@
 use cursive::{
     Vec2,
-    theme::{BaseColor, Color, ColorStyle},
+    theme::{Color, ColorStyle},
 };
 use rand::thread_rng;
 use rand::seq::SliceRandom;
@@ -105,7 +105,9 @@ impl Block {
         }
     }
 
+    #[cfg(not(feature = "wasm-backend"))]
     pub fn color(&self) -> ColorStyle {
+        use cursive::theme::BaseColor;
         match self.shape {
             Shape::I => ColorStyle::new(Color::Dark(BaseColor::Blue), Color::Dark(BaseColor::Blue)),
             Shape::O => ColorStyle::new(Color::Dark(BaseColor::Yellow), Color::Dark(BaseColor::Yellow)),
@@ -114,6 +116,19 @@ impl Block {
             Shape::Z => ColorStyle::new(Color::Dark(BaseColor::Red), Color::Dark(BaseColor::Red)),
             Shape::J => ColorStyle::new(Color::Dark(BaseColor::Cyan), Color::Dark(BaseColor::Cyan)),
             Shape::L => ColorStyle::new(Color::Dark(BaseColor::White), Color::Dark(BaseColor::White)),
+        }
+    }
+
+    #[cfg(feature = "wasm-backend")]
+    pub fn color(&self) -> ColorStyle {
+        match self.shape {
+            Shape::I => ColorStyle::new(Color::Rgb(55, 210, 235), Color::Rgb(55, 210, 235)),
+            Shape::O => ColorStyle::new(Color::Rgb(240, 205, 0), Color::Rgb(240, 205, 0)),
+            Shape::T => ColorStyle::new(Color::Rgb(145, 80, 175), Color::Rgb(145, 80, 175)),
+            Shape::S => ColorStyle::new(Color::Rgb(0, 175, 55), Color::Rgb(0, 175, 55)),
+            Shape::Z => ColorStyle::new(Color::Rgb(220, 0, 20), Color::Rgb(220, 0, 20)),
+            Shape::J => ColorStyle::new(Color::Rgb(0, 120, 195), Color::Rgb(0, 120, 195)),
+            Shape::L => ColorStyle::new(Color::Rgb(220, 100, 0), Color::Rgb(220, 100, 0)),
         }
     }
 }

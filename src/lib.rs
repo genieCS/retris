@@ -11,3 +11,7 @@ pub mod score;
 pub mod tetris;
 pub mod timer;
 pub mod queue;
+
+#[cfg(feature = "wasm-backend")]
+pub mod wasm;
+

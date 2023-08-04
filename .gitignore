@@ -1,1 +1,4 @@
 /target
+/wasm_backend/
+/www/node_modules/
+*.DS_Store

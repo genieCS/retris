@@ -40,7 +40,7 @@ impl View for Pause {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
-        if event != Event::Char('m') {
+        if event != Event::Char('m') && event != Event::Char('M') {
             EventResult::Ignored
         } else {
             EventResult::Consumed(Some(Callback::from_fn(move |s| {

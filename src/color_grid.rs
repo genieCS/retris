@@ -8,7 +8,9 @@ use crate::lrd::{ LR, LRD };
 
 pub struct ColorGrid {
     pub block: BlockWithPos,
-    colors: Vec<Vec<ColorStyle>>,
+    colors: Vec<ColorStyle>,
+    width: usize,
+    height: usize,
     background_color: (ColorStyle, ColorStyle),
     pub warning_color: ColorStyle,
 }
@@ -23,22 +25,22 @@ enum FlipRotate {
 
 impl ColorGrid {
     pub fn new(background_color: (ColorStyle, ColorStyle), warning_color: ColorStyle, width: usize, height: usize) -> Self {
-        let mut colors = Vec::with_capacity(height);
+        let mut colors = Vec::with_capacity(width * height);
         for h in 0..height {
-            let mut row = Vec::with_capacity(width);
             for w in 0..width {
                     let color = if (w + h) % 2 == 0 {
                         background_color.0
                     } else {
                         background_color.1
                     };
-                    row.push(color);
+                    colors.push(color);
             }
-            colors.push(row);
         }
         Self {
             block: Self::insert_random(width),
             colors,
+            width,
+            height,
             background_color,
             warning_color,
         }
@@ -183,11 +185,11 @@ impl ColorGrid {
     }
 
     pub fn width(&self) -> usize {
-        self.colors[0].len()
+        self.width
     }
 
     pub fn height(&self) -> usize {
-        self.colors.len()
+        self.height
     }
 
     fn set_background(&mut self, x: usize, y: usize) {
@@ -196,7 +198,7 @@ impl ColorGrid {
         } else {
             self.background_color.1
         };
-        self.colors[y][x] = color;
+        self.colors[self.width * y + x] = color;
     }
 
     pub fn renew(&mut self) {
@@ -217,9 +219,9 @@ impl ColorGrid {
     }
 
     pub fn is_occupied(&self, x: usize, y: usize) -> bool {
-        self.colors[y][x] != self.background_color.0 && 
-        self.colors[y][x] != self.background_color.1 &&
-        self.colors[y][x] != self.warning_color
+        self.colors[self.width * y + x] != self.background_color.0 && 
+        self.colors[self.width * y + x] != self.background_color.1 &&
+        self.colors[self.width * y + x] != self.warning_color
     }
 
     pub fn merge_block(&mut self) -> usize {
@@ -229,7 +231,7 @@ impl ColorGrid {
 
     fn fill_board_with_block(&mut self) {
         for cell in self.block.cells() {
-            self.colors[cell.y][cell.x] = self.block.color();
+            self.colors[self.width * cell.y + cell.x] = self.block.color();
         }
     }
 
@@ -257,12 +259,12 @@ impl ColorGrid {
         if rows_to_remove.is_empty() {
             return;
         }
-        let mut fill_y = self.height() - 1;
-        let mut check_y = self.height() - 1;
+        let mut fill_y = self.height - 1;
+        let mut check_y = self.height - 1;
         for row in rows_to_remove {
             while check_y > row {
                 if fill_y != check_y {
-                    self.colors[fill_y] = self.background_row(check_y, fill_y);
+                    self.set_background_row(check_y, fill_y);
                 }
                 fill_y -= 1;
                 check_y -= 1;
@@ -270,23 +272,22 @@ impl ColorGrid {
             check_y = row - 1;
         }
         while check_y > 0 {
-            self.colors[fill_y] = self.background_row(check_y, fill_y);
+            self.set_background_row(check_y, fill_y);
             fill_y -= 1;
             check_y -= 1;
         }
         while fill_y > 0 {
-            for x in 0..self.width() {
+            for x in 0..self.width {
                 self.set_background(x, fill_y);
             }
             fill_y -= 1;
         }
     }
 
-    fn background_row(&self, from: usize, to: usize) -> Vec<ColorStyle> {
-        let mut row = Vec::new();
-        for w in 0..self.width() {
+    fn set_background_row(&mut self, from: usize, to: usize) {
+        for w in 0..self.width {
             if self.is_occupied(w, from) {
-                row.push(self.colors[from][w]);
+                self.colors[self.width * to + w] = self.colors[self.width * from + w];
                 continue
             }
             let color = if (w + to) % 2 == 0 {
@@ -294,14 +295,13 @@ impl ColorGrid {
             } else {
                 self.background_color.1
             };
-            row.push(color);        
+            self.colors[self.width * to + w] = color;        
         }
-        row
     }
 }
 
 impl Index<usize> for ColorGrid {
-    type Output = Vec<ColorStyle>;
+    type Output = ColorStyle;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.colors[index]

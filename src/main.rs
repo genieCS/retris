@@ -1,5 +1,7 @@
-use retris::game::run;
-
+#[cfg(not(feature = "wasm-backend"))]
 fn main() {
-    run();
+    retris::game::run();
 }
+
+#[cfg(feature = "wasm-backend")]
+fn main() {}

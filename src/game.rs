@@ -1,3 +1,4 @@
+#![cfg(not(feature = "wasm-backend"))]
 use crate::backend::backend;
 use crate::tetris::Tetris;
 

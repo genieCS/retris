@@ -60,11 +60,11 @@ impl Board {
         match event {
             Event::Key(Key::Left)  => self.handle_lr(LR::Left, hit_bottom, false),
             Event::Key(Key::Right) => self.handle_lr(LR::Right, hit_bottom, false),
-            Event::Key(Key::Up) | Event::Char('e') => self.rotate(hit_bottom, true),
-            Event::Char('s') => self.flip_turn(hit_bottom),
-            Event::Char('w') => self.rotate(hit_bottom, false),
-            Event::Char('a') => self.handle_lr(LR::Left, hit_bottom, true),
-            Event::Char('d') => self.handle_lr(LR::Right, hit_bottom, true),
+            Event::Key(Key::Up) | Event::Char('e') | Event::Char('E') => self.rotate(hit_bottom, true),
+            Event::Char('s') | Event::Char('S') => self.flip_turn(hit_bottom),
+            Event::Char('w') | Event::Char('W') => self.rotate(hit_bottom, false),
+            Event::Char('a') | Event::Char('A') => self.handle_lr(LR::Left, hit_bottom, true),
+            Event::Char('d') | Event::Char('D') => self.handle_lr(LR::Right, hit_bottom, true),
             _ => false,
         }
     }
@@ -74,7 +74,7 @@ impl Board {
         let height = self.colors.height();
         for j in 0..height {
             for i in 0..width {
-                printer.with_color(self.colors[j][i], |printer| {
+                printer.with_color(self.colors[self.colors.width() * j + i], |printer| {
                     printer.print((2*i, j), "  ");
                 });
             }

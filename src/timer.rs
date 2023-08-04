@@ -1,14 +1,25 @@
 use crate::numbers;
-use std::time::Instant;
 use cursive::{
     View,
     Printer,
 };
 
+#[cfg(not(feature = "wasm-backend"))]
+use std::time::Instant;
+#[cfg(feature = "wasm-backend")]
+use js_sys::Date;
+
 pub struct Timer {
-    timer: Instant,
+    #[cfg(not(feature = "wasm-backend"))]
+    start: Instant,
+    #[cfg(feature = "wasm-backend")]
+    start: f64,
     is_paused: bool,
+    #[cfg(not(feature = "wasm-backend"))]
     pause_start: Instant,
+    #[cfg(feature = "wasm-backend")]
+    pause_start: f64,
+
 }
 
 impl Default for Timer {
@@ -19,33 +30,44 @@ impl Default for Timer {
 
 impl Timer {
     pub fn new() -> Self {
-        let now = Instant::now();
+        let now = Self::now();
         Self {
-            timer: now,
+            start: now,
             is_paused: false,
             pause_start: now,
         }
     }
+    
+    #[cfg(not(feature = "wasm-backend"))]
+    fn now() -> Instant {
+        Instant::now()
+    }
+
+    #[cfg(feature = "wasm-backend")]
+    fn now() -> f64 {
+        Date::now()
+    }
 
     pub fn renew(&mut self) {
-        let now = Instant::now();
-        self.timer = now;
+        let now = Self::now();
+        self.start = now;
         self.pause_start = now;
         self.is_paused = false;
     }
 
     pub fn toggle_pause(&mut self) {
+        let now = Self::now();
         if self.is_paused {
-            self.timer += Instant::now() - self.pause_start;
+            self.start += now - self.pause_start;
         } else {
-            self.pause_start = Instant::now();
+            self.pause_start = now;
         }
         self.is_paused = !self.is_paused;
     }
 
     pub fn reset(&mut self) {
-        let now = Instant::now();
-        self.timer = now;
+        let now = Self::now();
+        self.start = now;
         self.pause_start = now;
     }
 
@@ -58,13 +80,29 @@ impl Timer {
     }
 
     fn elapsed(&self) -> (u128, u128, u128) {
-        let mills = if self.is_paused {
-            (self.pause_start - self.timer).as_millis()
-        } else { self.timer.elapsed().as_millis() };
+        let mills = self.elapsed_mills();
         let mins = mills / 60000;
         let secs = (mills % 60000) / 1000;
         let mills = mills % 1000;
         (mins, secs, mills)
+    }
+
+    #[cfg(not(feature = "wasm-backend"))]
+    fn elapsed_mills(&self) -> u128 {
+        if self.is_paused {
+            (self.pause_start - self.start).as_millis()
+        } else {
+            (Self::now() - self.pause_start).as_millis()
+        }
+    }
+
+    #[cfg(feature = "wasm-backend")]
+    fn elapsed_mills(&self) -> u128 {
+        if self.is_paused {
+            (self.pause_start - self.start) as u128
+        } else {
+            (Self::now() - self.pause_start) as u128
+        }
     }
 }
 

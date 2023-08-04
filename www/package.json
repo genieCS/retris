@@ -1,0 +1,39 @@
+{
+  "name": "wretris",
+  "version": "0.5.0",
+  "description": "This is a wasm + rust implementation of tetris using the Cursive library",
+  "main": "index.js",
+  "bin": {
+    "create-wasm-app": ".bin/create-wasm-app.js"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genieCS/retris.git"
+  },
+  "keywords": [
+    "webassembly",
+    "wasm",
+    "rust",
+    "webpack"
+  ],
+  "author": "Hyejin Lee <genie4cs@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/users/genieCS/projects/2"
+  },
+  "homepage": "https://github.com/users/genieCS/projects/2",
+  "dependencies": {
+    "retris": "file:../pkg"
+  },
+  "devDependencies": {
+    "hello-wasm-pack": "^0.1.0",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5",
+    "copy-webpack-plugin": "^5.0.0"
+  }
+}
