@@ -90,8 +90,11 @@ impl Board {
     }
 
     fn draw_hint(&self, printer: &Printer) {
-        let hint = self.colors.hint();
+        #[cfg(not(feature = "wasm-backend"))]
         let color = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(0,0,0));
+        #[cfg(feature = "wasm-backend")]
+        let color = ColorStyle::new(Color::Rgb(255,255,255), Color::Rgb(255,255,255));
+        let hint = self.colors.hint();
         for cell in hint.cells() {
                 printer.with_color(color, |printer| {
                     printer.print((2*cell.x, cell.y), "░░");
