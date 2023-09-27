@@ -1,6 +1,7 @@
 # Retris
 This is a simple implementation of the classic tetris game in Rust using [Cursive](https://github.com/gyscos/cursive) library.
 
+[try game](https://geniecs.github.io)
 
 https://github.com/genieCS/retris/assets/35099832/010d9acb-c2f3-4fb2-aee5-656bc8d42225
 
